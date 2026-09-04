@@ -50,13 +50,29 @@
 - **Date**: 2026-09-03
 - **Status**: active
 
+### AD-007
+- **Decision**: Gestão de schema do banco via migrations versionadas do Flyway (`org.flywaydb:flyway-core` + `org.flywaydb:flyway-database-postgresql`, ambos sem versão explícita — herdados do BOM do `spring-boot-starter-parent` 4.1.1), com `spring.jpa.hibernate.ddl-auto=validate`. Nunca `update` ou `create`.
+- **Reason**: D10 exige que canais e categorias/keywords sejam cadastrados via `INSERT` de seed versionado — isso só é reproduzível e auditável com migrations versionadas, não com `ddl-auto`. Confirmado via Context7 (docs oficiais do Flyway) que, a partir das versões atuais, o suporte a PostgreSQL foi extraído de `flyway-core` para o módulo `flyway-database-postgresql` (carregado via ServiceLoader) — por isso os dois artefatos são necessários, não um só.
+- **Trade-off**: Toda alteração de schema exige escrever um arquivo de migration (`Vn__descricao.sql`) em vez de deixar o Hibernate inferir; ligeiramente mais cerimônia, mas elimina divergência silenciosa entre ambientes. A dependência e a primeira migration só serão adicionadas ao `pom.xml` na Tasks phase da feature que introduzir a primeira entidade JPA (`scraping-coleta`, dona de `Product`/`PriceHistory`) — adicionar o dependency agora, sem nenhuma migration, quebraria o boot da aplicação (Flyway falha se `classpath:db/migration` não existir com conteúdo).
+- **Scope**: Toda a camada de persistência — resolve a pendência aberta no PRD §7 ("Gestão do schema: Flyway vs. `ddl-auto`"). Governa `scraping-coleta`, `enriquecimento-conteudo`, `canais-disparo` e a feature `operacao-docker` (que documenta o requisito, ver `OPS-16..19`).
+- **Date**: 2026-09-03
+- **Status**: active
+
+### AD-008
+- **Decision**: Remover `spring-boot-starter-cache` e `spring-boot-starter-cache-test` do `pom.xml`. Dependência já removida (commit pendente do usuário).
+- **Reason**: AD-002/D4 já travam "sem Redis, sem cache" — a dependência estava presente no scaffold inicial do Spring Initializr sem nenhum uso previsto em nenhuma das 4 specs. Resolve a pendência aberta no PRD §7 ("`spring-boot-starter-cache` está no pom.xml mas D4 diz sem cache").
+- **Trade-off**: Nenhum — nenhuma feature depende dela. Se uma necessidade real de cache surgir em v2, a dependência volta via uma nova decisão (não reabre esta).
+- **Scope**: `pom.xml` do projeto inteiro.
+- **Date**: 2026-09-03
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: bot-amazon-spring v1 — Spec (4 features: scraping-coleta, enriquecimento-conteudo, canais-disparo, operacao-docker)
-- **Phase / Task**: Fase 2 (Spec) concluída para as 4 features — `validate_spec.py` passou limpo (0 erros, 0 warnings) nas 4 — aguardando aprovação do usuário
-- **Completed**: PRD (`.specs/PRD.md`), AD-001..AD-006, `spec.md` das 4 features com stories P1/P2/P3, ACs em EARS e traceability (SCRAPE-01..17, ENRICH-01..16, DISPATCH-01..26, OPS-01..15)
+- **Feature**: bot-amazon-spring v1 — Spec aprovado; pendências técnicas do PRD §7 resolvidas (AD-007, AD-008)
+- **Phase / Task**: Fase 2 (Spec) concluída e aprovada para as 4 features. Pendências de Flyway vs. ddl-auto e destino do `spring-boot-starter-cache` resolvidas e documentadas antes de iniciar Design/Tasks, por pedido explícito do usuário
+- **Completed**: PRD (`.specs/PRD.md`); AD-001..AD-008; `spec.md` das 4 features com stories P1/P2/P3, ACs em EARS e traceability (SCRAPE-01..17, ENRICH-01..16, DISPATCH-01..26, OPS-01..19); `pom.xml` já sem `spring-boot-starter-cache`/`-test` (AD-008 executado)
 - **In-progress**: nenhum arquivo em edição
-- **Next step**: Após aprovação do usuário, iniciar Fase 3 (Design) por feature — avaliar se cada uma precisa de `design.md` formal (tier Large/Complex) ou pode seguir direto para Tasks/Execute (tier Medium)
+- **Next step**: Iniciar Fase 3 (Design) para `scraping-coleta`, `enriquecimento-conteudo` e `canais-disparo` (design.md formal); `operacao-docker` segue direto para Tasks (Design inline já resolvido via OPS-16..19 + AD-007). Lembrar: dependência Flyway só entra no `pom.xml` na Tasks phase de `scraping-coleta` (primeira feature com entidade JPA), junto da 1ª migration — nunca antes, sob risco de o boot falhar sem `db/migration` populado
 - **Blockers**: none
-- **Uncommitted files**: `.specs/PRD.md`, `.specs/STATE.md`, `.specs/features/*/spec.md` (usuário faz commit manualmente)
-- **Branch**: main (sugestão: criar `docs/prd-v1` antes de commitar PRD; um branch por feature a partir da fase de Tasks/Execute)
+- **Uncommitted files**: `.specs/PRD.md`, `.specs/STATE.md`, `.specs/features/*/spec.md`, `pom.xml` (usuário faz commit manualmente)
+- **Branch**: main (sugestão: criar `docs/prd-v1` antes de commitar PRD+specs+pom.xml; um branch por feature a partir da fase de Tasks/Execute)

@@ -99,6 +99,23 @@ O bot precisa rodar de forma reproduzível em desenvolvimento (IDE + hot-reload)
 
 ---
 
+### P1: Gestão de schema via migrations Flyway ⭐ MVP
+
+**User Story**: Como operador, quero que o schema do banco seja versionado por migrations reproduzíveis, para nunca depender de inferência automática de schema (`ddl-auto`) e ter os `INSERT` de seed de canais/categorias (D10) rastreados junto com o schema que eles pressupõem.
+
+**Why P1**: Resolve a pendência aberta no PRD §7 (Flyway vs. `ddl-auto`) — decisão registrada em `.specs/STATE.md` (AD-007) e formalizada aqui como requisito da feature que a executa.
+
+**Acceptance Criteria**:
+
+1. THE sistema SHALL gerenciar o schema do banco exclusivamente via migrations versionadas do Flyway em `src/main/resources/db/migration`, nunca via `spring.jpa.hibernate.ddl-auto=update` ou `create`.
+2. THE sistema SHALL configurar `spring.jpa.hibernate.ddl-auto=validate`, garantindo que o schema real seja sempre exatamente o definido pelas migrations Flyway.
+3. THE sistema SHALL versionar no controle de versão toda migration que insira dados de seed (ex.: canais e categorias exigidos por D10), junto com a migration de schema que ela pressupõe.
+4. IF a aplicação subir sem que uma migration pendente tenha sido aplicada com sucesso THEN o sistema SHALL falhar o boot (fail-fast), nunca subir com schema divergente do esperado pelo código.
+
+**Independent Test**: Remover uma coluna esperada via migration ausente e confirmar que a aplicação falha o boot em vez de subir com schema incompleto.
+
+---
+
 ## Edge Cases
 
 - IF o serviço Postgres não atingir o healthcheck dentro do tempo configurado THEN o serviço `app` SHALL não iniciar, respeitando o comportamento padrão do `depends_on: condition: service_healthy` do Docker Compose.
@@ -125,12 +142,16 @@ O bot precisa rodar de forma reproduzível em desenvolvimento (IDE + hot-reload)
 | OPS-13 | P1: Log estruturado por etapa | Design | Pending |
 | OPS-14 | Edge case: healthcheck Postgres | Design | Pending |
 | OPS-15 | Edge case: healthcheck Selenium | Design | Pending |
+| OPS-16 | P1: Gestão de schema via Flyway | Design | Pending |
+| OPS-17 | P1: Gestão de schema via Flyway | Design | Pending |
+| OPS-18 | P1: Gestão de schema via Flyway | Design | Pending |
+| OPS-19 | P1: Gestão de schema via Flyway | Design | Pending |
 
 **ID format:** `OPS-NN`
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 15 total, 0 mapped to tasks, 15 unmapped ⚠️ (Design/Tasks ainda não iniciados)
+**Coverage:** 19 total, 0 mapped to tasks, 19 unmapped ⚠️ (Design/Tasks ainda não iniciados)
 
 ---
 
