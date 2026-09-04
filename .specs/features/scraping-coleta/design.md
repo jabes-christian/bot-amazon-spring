@@ -40,7 +40,7 @@ graph TD
     PDS --> PHR
     PDS -->|"lê limiares"| CFG
     CFG --> ACR[AppConfigRepository]
-    PDS -->|"retorna List Product"| DSCH
+    PDS -->|"retorna List CandidatoPromocaoDTO"| DSCH
 ```
 
 ---
@@ -55,7 +55,7 @@ Não há código local reaproveitável (repositório é um esqueleto vazio). O r
 | --- | --- | --- |
 | `BaseScraper` (abstract, injeta `WebDriver` + `WebDriverWait`, expõe `navegarPara`/`aguardarElemento(s)`/`extrairTexto`/`extrairAtributo`/`elementoExiste`) | `scraper/base/BaseScraper.java` | Copiado quase igual — é infraestrutura Selenium genérica, não específica de domínio |
 | Uma subclasse de scraper por fonte (`WorkanaScraper`, `FreelasScraper`) | **Não replicado 1:1** — ver Tech Decisions | Aqui as 5 categorias batem na mesma estrutura de página da Amazon; uma única classe parametrizada por keyword evita 5 subclasses quase idênticas |
-| `SeleniumConfig` (bean `WebDriver`: local via WebDriverManager quando `selenium.remote.url` vazio, `RemoteWebDriver` quando preenchido) | Reaproveitado tal como está — é exatamente o que `operacao-docker` (OPS-16..19 tratam schema, mas o bean de WebDriver já estava coberto por OPS story "Ambiente de desenvolvimento/produção") precisa | Nenhuma adaptação de domínio necessária |
+| `SeleniumConfig` (bean `WebDriver`: local via WebDriverManager quando `selenium.remote.url` vazio, `RemoteWebDriver` quando preenchido) | **Escrito nesta feature** (`scraping-coleta`), não em `operacao-docker` — ver nota abaixo | Nenhuma adaptação de domínio necessária, reaproveitado quase igual ao do projeto de referência |
 | DTO como `record` com construtor compacto validando campos obrigatórios + factory `of(...)` | `ScrapedProductDTO` | Mesmo padrão, campos do domínio Amazon |
 | Entity com Lombok (`@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder`) + `@PrePersist` para timestamp | `Product`, `PriceHistory`, `CategoriaColeta` | Mesmo padrão |
 | Repository Spring Data com métodos derivados (`existsByLink`, `findByX`) | `ProductRepository`, `PriceHistoryRepository`, `CategoriaColetaRepository` | Mesmo padrão + 1 `@Query` para MIN(preço) |
@@ -106,11 +106,21 @@ Não há código local reaproveitável (repositório é um esqueleto vazio). O r
 
 ### `PromotionDetectionService`
 
-- **Purpose**: Determinar quais produtos têm queda de preço relevante, usando o histórico como fonte de verdade (D8) com fallback de cold start.
+> **Revisão (durante o Design de `canais-disparo`)**: o retorno original desta interface era `List<Product>`. Ao desenhar `canais-disparo`, ficou claro que DISPATCH-10 ("ordenar candidatos por percentual de desconto decrescente") precisa desse percentual — e ele só existe no instante da detecção (é `(precoBase - precoAtual) / precoBase`; `precoBase` não fica armazenado em `Product`, e `lastCandidatoPreco` já é sobrescrito pelo valor novo antes do método retornar). Sem essa mudança, `canais-disparo` teria que recalcular a mesma regra de negócio por fora, duplicando-a. Retorno alterado para `List<CandidatoPromocaoDTO>`, chamado exatamente uma vez por ciclo de disparo (nunca uma vez por canal — ver design de `canais-disparo`, Architecture Overview).
+
+- **Purpose**: Determinar quais produtos têm queda de preço relevante, usando o histórico como fonte de verdade (D8) com fallback de cold start, retornando também o percentual de desconto calculado.
 - **Location**: `src/main/java/com/jchristian/bot_amazon_spring/service/PromotionDetectionService.java`
 - **Interfaces**:
-  - `List<Product> buscarCandidatosElegiveis(): List<Product>` — para cada `Product`: calcula preço-base de comparação (mínimo do histórico se ≥ 2 entradas, senão `precoRiscado` se presente, senão pula o produto); se `precoAtual <= precoBase * (1 - percentualMinimo)` **e** `precoAtual != lastCandidatoPreco` → inclui no resultado e atualiza `lastCandidatoPreco = precoAtual`
+  - `List<CandidatoPromocaoDTO> buscarCandidatosElegiveis(): List<CandidatoPromocaoDTO>` — para cada `Product`: calcula preço-base de comparação (mínimo do histórico se ≥ 2 entradas, senão `precoRiscado` se presente, senão pula o produto); se `precoAtual <= precoBase * (1 - percentualMinimo)` **e** `precoAtual != lastCandidatoPreco` → inclui `new CandidatoPromocaoDTO(product, percentualDesconto)` no resultado e atualiza `lastCandidatoPreco = precoAtual`
 - **Dependencies**: `ProductRepository`, `PriceHistoryRepository`, `ConfigService`
+- **Reuses**: Nenhum
+
+### `CandidatoPromocaoDTO`
+
+- **Purpose**: Carregar, junto com o `Product`, o percentual de desconto calculado no momento da detecção — para `canais-disparo` ordenar/priorizar sem recalcular a regra de negócio.
+- **Location**: `src/main/java/com/jchristian/bot_amazon_spring/dto/CandidatoPromocaoDTO.java`
+- **Interfaces**: `record CandidatoPromocaoDTO(Product produto, BigDecimal percentualDesconto)`
+- **Dependencies**: Nenhuma
 - **Reuses**: Nenhum
 
 ### `CategoriaColetaRepository`, `ProductRepository`, `PriceHistoryRepository`
@@ -124,6 +134,16 @@ Não há código local reaproveitável (repositório é um esqueleto vazio). O r
   - `PriceHistoryRepository.findMenorPrecoByProduct(Product product): Optional<BigDecimal>` (`@Query` com `MIN(preco)`)
 - **Dependencies**: Spring Data JPA
 - **Reuses**: Padrão `JpaRepository<Entity, Long>` com métodos derivados, igual ao `OpportunityRepository` de referência
+
+### `SeleniumConfig` (bean de configuração — nasce aqui, não em `operacao-docker`)
+
+> **Ajuste (descoberto ao propor a ordem de execução das 4 features)**: a spec de `operacao-docker` (Stories A/B) descreve o COMPORTAMENTO exigido do bean `WebDriver` (local vs. remoto conforme `selenium.remote.url`) — isso continua correto e não muda. Mas o ARQUIVO `SeleniumConfig.java` precisa existir e compilar antes de `AmazonProductScraper` (desta feature) poder ser escrito, porque o scraper injeta `WebDriver` no construtor. Como `operacao-docker` está planejado para ser a última das 4 features (ver proposta de ordem), esperar por ela criaria uma dependência circular na prática. Resolução: `SeleniumConfig.java` é escrito **aqui**, na Tasks phase de `scraping-coleta` — a Tasks phase de `operacao-docker`, mais adiante, apenas valida/usa esse bean já existente ao montar os `docker-compose` dev/prod (as ACs de OPS-01..03 continuam rastreáveis a `operacao-docker`, só a implementação física é antecipada).
+
+- **Purpose**: Prover o bean `WebDriver` (local via WebDriverManager, ou remoto via `RemoteWebDriver` apontando pro container `selenium/standalone-chrome` de produção).
+- **Location**: `src/main/java/com/jchristian/bot_amazon_spring/config/SeleniumConfig.java`
+- **Interfaces**: `@Bean ChromeOptions chromeOptions()`, `@Bean WebDriver webDriver(ChromeOptions)` — `RemoteWebDriver` se `${selenium.remote.url:}` não vazio, senão `ChromeDriver` local com `WebDriverManager.chromedriver().setup()`
+- **Dependencies**: `selenium-java`, `webdrivermanager` (ambos já no `pom.xml`)
+- **Reuses**: Padrão quase idêntico ao `SeleniumConfig` do projeto de referência (inspecionado via GitHub) — headless, user-agent realista, mesmo mecanismo de fallback local/remoto
 
 ### `ConfigService` (infraestrutura compartilhada — nasce aqui, reusada por todas as features seguintes)
 
