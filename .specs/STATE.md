@@ -52,11 +52,11 @@
 
 ## Handoff
 
-- **Feature**: bot-amazon-spring v1 — PRD
-- **Phase / Task**: Fase 1 (PRD) concluída e aprovada
-- **Completed**: PRD (`.specs/PRD.md`), decisões de projeto registradas (AD-001..AD-006)
+- **Feature**: bot-amazon-spring v1 — Spec (4 features: scraping-coleta, enriquecimento-conteudo, canais-disparo, operacao-docker)
+- **Phase / Task**: Fase 2 (Spec) concluída para as 4 features — `validate_spec.py` passou limpo (0 erros, 0 warnings) nas 4 — aguardando aprovação do usuário
+- **Completed**: PRD (`.specs/PRD.md`), AD-001..AD-006, `spec.md` das 4 features com stories P1/P2/P3, ACs em EARS e traceability (SCRAPE-01..17, ENRICH-01..16, DISPATCH-01..26, OPS-01..15)
 - **In-progress**: nenhum arquivo em edição
-- **Next step**: Iniciar Fase 2 (Spec) — escrever `.specs/features/[feature]/spec.md` com user stories P1/P2/P3 e critérios de aceite em EARS, e apresentar para aprovação
+- **Next step**: Após aprovação do usuário, iniciar Fase 3 (Design) por feature — avaliar se cada uma precisa de `design.md` formal (tier Large/Complex) ou pode seguir direto para Tasks/Execute (tier Medium)
 - **Blockers**: none
-- **Uncommitted files**: `.specs/PRD.md`, `.specs/STATE.md` (usuário faz commit manualmente)
-- **Branch**: main (sugestão: criar `docs/prd-v1` antes de commitar)
+- **Uncommitted files**: `.specs/PRD.md`, `.specs/STATE.md`, `.specs/features/*/spec.md` (usuário faz commit manualmente)
+- **Branch**: main (sugestão: criar `docs/prd-v1` antes de commitar PRD; um branch por feature a partir da fase de Tasks/Execute)
