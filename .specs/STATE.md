@@ -66,13 +66,21 @@
 - **Date**: 2026-09-03
 - **Status**: active
 
+### AD-009
+- **Decision**: Todo limiar numérico de **negócio** (percentual mínimo de queda, faixa de sanidade de preço, intervalo entre categorias, e nas próximas features: janela de dedup, teto de produtos por canal, intervalo entre envios, timeout do LLM, limite de caracteres da copy, janela do selo "menor preço") é lido em runtime de uma tabela genérica `app_config` (chave/valor) via um `ConfigService` único e compartilhado — nunca de `@ConfigurationProperties`/`application.properties`. Seletores CSS e outros detalhes técnicos de implementação continuam em `@ConfigurationProperties` (não entram em `app_config`).
+- **Reason**: Revisão pedida pelo usuário durante o Design de `scraping-coleta` — os mesmos limiares que motivaram `CategoriaColeta` ser tabela em vez de enum (O5, "0 deploy") se aplicam aos limiares de negócio: o operador quer poder testar 10% vs. 15% de desconto mínimo, ou reduzir a janela de dedup numa data de alta promoção, sem esperar restart/redeploy. `@ConfigurationProperties` exigiria reiniciar a aplicação a cada ajuste, o que contraria essa necessidade já expressa.
+- **Trade-off**: Cada feature que introduzir um novo limiar de negócio precisa semear sua chave em `app_config` via a própria migration Flyway, em vez de só adicionar uma propriedade ao arquivo de config. Sem cache (AD-002/D4) — toda leitura é uma consulta indexada por chave única; volume irrelevante neste projeto (poucas leituras por ciclo agendado, não por requisição web).
+- **Scope**: Toda decisão de "onde mora um número configurável" em qualquer feature futura. `app_config`/`ConfigService` nascem em `scraping-coleta` (primeira feature com Flyway) e são reusados sem alteração por `canais-disparo` e `enriquecimento-conteudo`, cada uma semeando suas próprias chaves.
+- **Date**: 2026-09-03
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: bot-amazon-spring v1 — Spec aprovado; pendências técnicas do PRD §7 resolvidas (AD-007, AD-008)
-- **Phase / Task**: Fase 2 (Spec) concluída e aprovada para as 4 features. Pendências de Flyway vs. ddl-auto e destino do `spring-boot-starter-cache` resolvidas e documentadas antes de iniciar Design/Tasks, por pedido explícito do usuário
-- **Completed**: PRD (`.specs/PRD.md`); AD-001..AD-008; `spec.md` das 4 features com stories P1/P2/P3, ACs em EARS e traceability (SCRAPE-01..17, ENRICH-01..16, DISPATCH-01..26, OPS-01..19); `pom.xml` já sem `spring-boot-starter-cache`/`-test` (AD-008 executado)
+- **Feature**: `scraping-coleta` — Fase 3 (Design)
+- **Phase / Task**: `design.md` de `scraping-coleta` revisado após 2 pedidos do usuário na 1ª apresentação (limiares de negócio → `app_config`/`ConfigService`, não properties; validação de seletores → procedimento concreto com tabela de candidatos + passo a passo DevTools) — aguardando aprovação final antes de Tasks
+- **Completed**: PRD (`.specs/PRD.md`); AD-001..AD-009; `spec.md` das 4 features (SCRAPE-01..17, ENRICH-01..16, DISPATCH-01..26, OPS-01..19); `pom.xml` sem `spring-boot-starter-cache`/`-test` (AD-008); `.specs/features/scraping-coleta/design.md` v2 (entidades CategoriaColeta/Product/PriceHistory/AppConfig, ColetaService, PromotionDetectionService, ConfigService, AmazonProductScraper reaproveitando BaseScraper/SeleniumConfig do projeto de referência, seção de validação de seletores com procedimento executável)
 - **In-progress**: nenhum arquivo em edição
-- **Next step**: Iniciar Fase 3 (Design) para `scraping-coleta`, `enriquecimento-conteudo` e `canais-disparo` (design.md formal); `operacao-docker` segue direto para Tasks (Design inline já resolvido via OPS-16..19 + AD-007). Lembrar: dependência Flyway só entra no `pom.xml` na Tasks phase de `scraping-coleta` (primeira feature com entidade JPA), junto da 1ª migration — nunca antes, sob risco de o boot falhar sem `db/migration` populado
+- **Next step**: Após aprovação do design de `scraping-coleta`, seguir para Design de `enriquecimento-conteudo`, depois `canais-disparo` (ordem confirmada pelo usuário) — ambas devem reusar `app_config`/`ConfigService` (AD-009) para seus próprios limiares, não reabrir a discussão de properties vs. tabela. Só então Tasks — e é na Tasks de `scraping-coleta` que entram no `pom.xml` as dependências Flyway + a 1ª migration (`V1__create_scraping_coleta_tables.sql`, incluindo `app_config`), nunca antes
 - **Blockers**: none
-- **Uncommitted files**: `.specs/PRD.md`, `.specs/STATE.md`, `.specs/features/*/spec.md`, `pom.xml` (usuário faz commit manualmente)
+- **Uncommitted files**: `.specs/PRD.md`, `.specs/STATE.md`, `.specs/features/*/spec.md`, `.specs/features/scraping-coleta/design.md`, `pom.xml` (usuário faz commit manualmente)
 - **Branch**: main (sugestão: criar `docs/prd-v1` antes de commitar PRD+specs+pom.xml; um branch por feature a partir da fase de Tasks/Execute)
