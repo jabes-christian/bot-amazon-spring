@@ -313,14 +313,16 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] `navegarPara` chama `driver.get(url)` com a URL recebida
-- [ ] `aguardarElementos`/`extrairTexto`/`extrairAtributo` usam `WebDriverWait` real sobre um `WebDriver`/`WebElement` mockado (Mockito) e retornam os valores esperados
-- [ ] `elementoExiste` retorna `true` quando o elemento é encontrado e `false` quando `WebDriver` lança `NoSuchElementException`/timeout
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 5 testes passam (1 por método), 0 falhas
+- [x] `navegarPara` chama `driver.get(url)` com a URL recebida
+- [x] `aguardarElementos`/`extrairTexto`/`extrairAtributo` usam `WebDriverWait` real sobre um `WebDriver`/`WebElement` mockado (Mockito) e retornam os valores esperados
+- [x] `elementoExiste` retorna `true` quando o elemento é encontrado e `false` quando `WebDriver` lança `NoSuchElementException`/timeout
+- [x] Gate check passa: `mvn test`
+- [x] Test count: 6 testes passam (1 por método, mais 1 extra para o caso `elementoExiste=false`), 0 falhas
 
 **Tests**: unit
 **Gate**: quick
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona BaseScraper com helpers Selenium reutilizáveis`
 
