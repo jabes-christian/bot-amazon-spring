@@ -5,12 +5,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.time.Duration;
 
 @Configuration
 public class SeleniumConfig {
@@ -32,6 +34,12 @@ public class SeleniumConfig {
 		}
 		WebDriverManager.chromedriver().setup();
 		return new ChromeDriver(chromeOptions);
+	}
+
+	@Bean
+	public WebDriverWait webDriverWait(WebDriver webDriver,
+			@Value("${selenium.wait-timeout-segundos:10}") long timeoutSegundos) {
+		return new WebDriverWait(webDriver, Duration.ofSeconds(timeoutSegundos));
 	}
 
 }

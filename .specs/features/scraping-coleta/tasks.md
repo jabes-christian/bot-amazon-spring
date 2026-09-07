@@ -272,6 +272,8 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 ### T7: `SeleniumConfig`
 
+> **Correção (2026-09-07, durante a execução de T10)**: faltava o bean `WebDriverWait` — `BaseScraper` (T8) exige um no construtor, e nem o design nem esta task o listavam entre os beans de `SeleniumConfig`. Só apareceu como `NoSuchBeanDefinitionException` ao rodar `mvn clean verify` com `AmazonProductScraper` (T10) já wireado no contexto completo — nenhum teste unitário de T7 ou T8 isoladamente exercitava essa ligação. Corrigido: `SeleniumConfig` ganhou `@Bean WebDriverWait webDriverWait(WebDriver, timeoutSegundos)`, com `selenium.wait-timeout-segundos` (default 10) como propriedade técnica (`@Value`, não `app_config` — mesmo racional dos seletores CSS, AD-009).
+
 **What**: Criar o bean `WebDriver` — `RemoteWebDriver` quando `${selenium.remote.url:}` não vazio, senão `ChromeDriver` local via `WebDriverManager.chromedriver().setup()` — e o bean `ChromeOptions` (headless, user-agent realista).
 **Where**: `src/main/java/com/jchristian/bot_amazon_spring/config/SeleniumConfig.java`
 **Depends on**: None
@@ -374,15 +376,17 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] `AmazonSelectorsProperties` expõe um campo por seletor candidato da tabela de Design (container do card, ASIN, título, preço atual, preço riscado, imagem, link)
-- [ ] `buscarPorKeyword` navega para a URL de busca correta (`/s?k={keyword}`, keyword codificada corretamente na URL)
-- [ ] `buscarPorKeyword` extrai ASIN, título, preço atual, preço riscado (quando presente), URL da imagem e URL do produto de cada card (mockando `WebDriver`/`WebElement` para simular N cards)
-- [ ] Cards sem ASIN ou sem preço atual são descartados do resultado, não geram `ScrapedProductDTO`
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 4 testes passam (URL correta, extração completa, card sem ASIN filtrado, card sem preço filtrado), 0 falhas
+- [x] `AmazonSelectorsProperties` expõe um campo por seletor candidato da tabela de Design (container do card, ASIN, título, preço atual, preço riscado, imagem, link)
+- [x] `buscarPorKeyword` navega para a URL de busca correta (`/s?k={keyword}`, keyword codificada corretamente na URL)
+- [x] `buscarPorKeyword` extrai ASIN, título, preço atual, preço riscado (quando presente), URL da imagem e URL do produto de cada card (mockando `WebDriver`/`WebElement` para simular N cards)
+- [x] Cards sem ASIN ou sem preço atual são descartados do resultado, não geram `ScrapedProductDTO`
+- [x] Gate check passa: `mvn test` (e `mvn clean verify` para confirmar que o contexto completo sobe — foi aqui que o gap do `WebDriverWait` apareceu; ver correção no topo desta task)
+- [x] Test count: 4 testes passam (URL correta, extração completa, card sem ASIN filtrado, card sem preço filtrado), 0 falhas
 
 **Tests**: unit
 **Gate**: quick
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona AmazonProductScraper e seletores configuráveis`
 
