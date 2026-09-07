@@ -82,7 +82,9 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 ### T1: Flyway + Testcontainers + migration inicial de schema
 
-**What**: Adicionar as dependências Flyway (`flyway-core`, `flyway-database-postgresql`) e de teste (`spring-boot-starter-test`, `spring-boot-testcontainers`, `testcontainers-postgresql`, `testcontainers-junit-jupiter`) ao `pom.xml`, configurar o `maven-failsafe-plugin` (execuções `integration-test`+`verify`), configurar `spring.jpa.hibernate.ddl-auto=validate`, criar a migration `V1__create_scraping_coleta_tables.sql` (tabelas `categoria_coleta`, `product`, `price_history`, `app_config` + seed das 5 categorias + seed das 4 chaves de `app_config` desta feature — ver `design.md`/Data Models), e transformar o teste placeholder do Initializr em um smoke test real de contexto+migration.
+> **Correção (2026-09-07, durante a execução desta task)**: o gate rodou verde na primeira tentativa (contexto sobe, teste passa), mas a asserção de contagem de tabelas falhou (`expected: 4, but was: 0`) — o Flyway nunca era acionado. Causa: em Spring Boot 4, `FlywayAutoConfiguration` vive num módulo próprio (`spring-boot-flyway`) que `org.flywaydb:flyway-core` sozinho não traz; o artefato correto é o starter `org.springframework.boot:spring-boot-starter-flyway` (confirmado via Context7 na fonte do próprio `spring-boot`). Ver AD-007 em `STATE.md` para o racional completo. `Where`/`Done when` abaixo já refletem a correção — `flyway-core` isolado não é mais usado.
+
+**What**: Adicionar as dependências Flyway (`spring-boot-starter-flyway`, `flyway-database-postgresql`) e de teste (`spring-boot-starter-test`, `spring-boot-testcontainers`, `testcontainers-postgresql`, `testcontainers-junit-jupiter`) ao `pom.xml`, configurar o `maven-failsafe-plugin` (execuções `integration-test`+`verify`), configurar `spring.jpa.hibernate.ddl-auto=validate`, criar a migration `V1__create_scraping_coleta_tables.sql` (tabelas `categoria_coleta`, `product`, `price_history`, `app_config` + seed das 5 categorias + seed das 4 chaves de `app_config` desta feature — ver `design.md`/Data Models), e transformar o teste placeholder do Initializr em um smoke test real de contexto+migration.
 **Where**: `pom.xml`, `src/main/resources/application.properties`, `src/main/resources/db/migration/V1__create_scraping_coleta_tables.sql`, `src/test/java/com/jchristian/bot_amazon_spring/BotAmazonSpringApplicationIT.java` (renomeado de `BotAmazonSpringApplicationTests.java`)
 **Depends on**: None
 **Reuses**: Nenhum. Nenhuma dependência ganha versão explícita — todas herdadas do BOM do `spring-boot-starter-parent` 4.1.1 (confirmado via Context7 para Flyway/AD-007 e para Testcontainers), seguindo a convenção já usada no `pom.xml`
@@ -95,17 +97,19 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] `pom.xml` tem as 2 dependências Flyway (escopo padrão) e as 4 dependências de teste (escopo `test`), todas sem `<version>` explícita
-- [ ] `maven-failsafe-plugin` configurado no `<build><plugins>` com execuções ligadas às fases `integration-test` e `verify`
-- [ ] `application.properties` tem `spring.jpa.hibernate.ddl-auto=validate`
-- [ ] Migration cria as 4 tabelas com as colunas descritas em `design.md`/Data Models, incluindo o índice em `price_history(product_id, capturado_em)`
-- [ ] Migration semeia as 5 categorias (MONITOR, NOTEBOOK, PERIFERICO, CADEIRA_GAMER, MESA) e as 4 chaves de `app_config` (`coleta.percentual-minimo-queda=10`, `coleta.preco-minimo-valido=0.01`, `coleta.preco-maximo-valido=50000.00`, `coleta.intervalo-entre-categorias-segundos=5`)
-- [ ] `BotAmazonSpringApplicationIT` usa `@Testcontainers(disabledWithoutDocker = true)` + `@Container @ServiceConnection static PostgreSQLContainer` e confirma que o contexto sobe com a migration aplicada (ex.: consulta às 4 tabelas via `JdbcTemplate`, ou equivalente)
-- [ ] Gate check passa: `mvn clean verify`
-- [ ] Test count: 1 teste de integração passa (o smoke test), 0 falhas
+- [x] `pom.xml` tem as 2 dependências Flyway (escopo padrão) e as 4 dependências de teste (escopo `test`), todas sem `<version>` explícita
+- [x] `maven-failsafe-plugin` configurado no `<build><plugins>` com execuções ligadas às fases `integration-test` e `verify`
+- [x] `application.properties` tem `spring.jpa.hibernate.ddl-auto=validate`
+- [x] Migration cria as 4 tabelas com as colunas descritas em `design.md`/Data Models, incluindo o índice em `price_history(product_id, capturado_em)`
+- [x] Migration semeia as 5 categorias (MONITOR, NOTEBOOK, PERIFERICO, CADEIRA_GAMER, MESA) e as 4 chaves de `app_config` (`coleta.percentual-minimo-queda=10`, `coleta.preco-minimo-valido=0.01`, `coleta.preco-maximo-valido=50000.00`, `coleta.intervalo-entre-categorias-segundos=5`)
+- [x] `BotAmazonSpringApplicationIT` usa `@Testcontainers(disabledWithoutDocker = true)` + `@Container @ServiceConnection static PostgreSQLContainer` e confirma que o contexto sobe com a migration aplicada: 4 tabelas existem, `categoria_coleta` tem 5 linhas, `app_config` tem 4 linhas
+- [x] Gate check passa: `mvn clean verify`
+- [x] Test count: 1 teste de integração passa (o smoke test), 0 falhas
 
 **Tests**: integration
 **Gate**: build
+
+**Status**: ✅ Complete
 
 **Commit**: `build(scraping-coleta): adiciona Flyway, Testcontainers e migration inicial de schema`
 
