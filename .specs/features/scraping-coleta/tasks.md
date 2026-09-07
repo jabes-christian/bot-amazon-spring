@@ -192,14 +192,16 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] `CategoriaColeta` mapeia exatamente as colunas da migration (T1)
-- [ ] `findByAtivoTrue()` retorna só as categorias com `ativo = true`
-- [ ] Teste de integração confirma: as 5 categorias semeadas em T1 aparecem via `findByAtivoTrue()`; uma categoria marcada `ativo = false` não aparece no resultado
-- [ ] Gate check passa: `mvn verify`
-- [ ] Test count: 2 testes passam, 0 falhas
+- [x] `CategoriaColeta` mapeia exatamente as colunas da migration (T1)
+- [x] `findByAtivoTrue()` retorna só as categorias com `ativo = true`
+- [x] Teste de integração confirma: as 5 categorias semeadas em T1 aparecem via `findByAtivoTrue()`; uma categoria marcada `ativo = false` não aparece no resultado
+- [x] Gate check passa: `mvn verify`
+- [x] Test count: 2 testes passam, 0 falhas
 
 **Tests**: integration
 **Gate**: full
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona entidade e repository de CategoriaColeta`
 
