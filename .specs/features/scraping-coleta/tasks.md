@@ -222,14 +222,16 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] `Product` mapeia exatamente as colunas da migration (T1), com `categoria` como `@ManyToOne` obrigatório
-- [ ] `findByAsin(String asin)` retorna `Optional<Product>`
-- [ ] Teste de integração confirma: salvar e buscar por ASIN existente; ASIN inexistente retorna `Optional.empty()`; inserir ASIN duplicado viola a constraint única
-- [ ] Gate check passa: `mvn verify`
-- [ ] Test count: 3 testes passam, 0 falhas
+- [x] `Product` mapeia exatamente as colunas da migration (T1), com `categoria` como `@ManyToOne` obrigatório
+- [x] `findByAsin(String asin)` retorna `Optional<Product>`
+- [x] Teste de integração confirma: salvar e buscar por ASIN existente; ASIN inexistente retorna `Optional.empty()`; inserir ASIN duplicado viola a constraint única
+- [x] Gate check passa: `mvn verify`
+- [x] Test count: 3 testes passam, 0 falhas
 
 **Tests**: integration
 **Gate**: full
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona entidade e repository de Product`
 
