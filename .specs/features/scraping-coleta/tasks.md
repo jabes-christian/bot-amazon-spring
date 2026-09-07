@@ -117,6 +117,8 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 ### T2: Entidade e repository de `AppConfig`
 
+> **Correção (2026-09-07, durante a execução desta task)**: `@DataJpaTest` e `@AutoConfigureTestDatabase` não estão nos pacotes clássicos (`org.springframework.boot.test.autoconfigure.orm.jpa`/`...jdbc`) nesta versão — Spring Boot 4 moveu ambos para módulos próprios. Pacotes corretos, confirmados via Context7 (arquivo-fonte oficial do `spring-boot`): `org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest` e `org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase`. **Vale para T4, T5 e T6 também** (mesmas anotações).
+
 **What**: Criar a entidade JPA `AppConfig` (chave/valor/descrição/atualizadoEm, `chave` única) e `AppConfigRepository` com `findByChave(String)`.
 **Where**: `src/main/java/com/jchristian/bot_amazon_spring/entity/AppConfig.java`, `src/main/java/com/jchristian/bot_amazon_spring/repository/AppConfigRepository.java`
 **Depends on**: T1
@@ -130,14 +132,16 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] `AppConfig` mapeia exatamente as colunas da migration (T1), com `chave` marcada única
-- [ ] `AppConfigRepository.findByChave(String chave)` retorna `Optional<AppConfig>`
-- [ ] Teste de integração cobre: salvar e buscar por chave existente; buscar chave inexistente retorna `Optional.empty()`; inserir chave duplicada viola a constraint única
-- [ ] Gate check passa: `mvn verify`
-- [ ] Test count: 3 testes passam, 0 falhas
+- [x] `AppConfig` mapeia exatamente as colunas da migration (T1), com `chave` marcada única
+- [x] `AppConfigRepository.findByChave(String chave)` retorna `Optional<AppConfig>`
+- [x] Teste de integração cobre: salvar e buscar por chave existente; buscar chave inexistente retorna `Optional.empty()`; inserir chave duplicada viola a constraint única
+- [x] Gate check passa: `mvn verify`
+- [x] Test count: 3 testes passam, 0 falhas
 
 **Tests**: integration
 **Gate**: full
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona entidade e repository de AppConfig`
 
