@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -111,6 +113,23 @@ class AmazonProductScraperTest {
 		List<ScrapedProductDTO> produtos = scraper.buscarPorKeyword("monitor gamer");
 
 		assertThat(produtos).isEmpty();
+	}
+
+	@Test
+	void buscarPorKeywordRetornaListaVaziaQuandoZeroCardsEncontrados() {
+		when(driver.findElements(By.cssSelector(selectors.getCardContainer()))).thenReturn(List.of());
+
+		List<ScrapedProductDTO> produtos = scraper.buscarPorKeyword("produto sem resultado nenhum");
+
+		assertThat(produtos).isEmpty();
+	}
+
+	@Test
+	void buscarPorKeywordPropagaExcecoesQueNaoSaoTimeout() {
+		when(driver.findElements(By.cssSelector(selectors.getCardContainer())))
+				.thenThrow(new WebDriverException("driver morto"));
+
+		assertThrows(WebDriverException.class, () -> scraper.buscarPorKeyword("monitor gamer"));
 	}
 
 }

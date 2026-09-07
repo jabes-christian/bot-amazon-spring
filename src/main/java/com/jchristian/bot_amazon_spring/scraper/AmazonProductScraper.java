@@ -5,6 +5,7 @@ import com.jchristian.bot_amazon_spring.dto.ScrapedProductDTO;
 import com.jchristian.bot_amazon_spring.scraper.base.BaseScraper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -31,7 +32,12 @@ public class AmazonProductScraper extends BaseScraper {
 	public List<ScrapedProductDTO> buscarPorKeyword(String keyword) {
 		navegarPara(BASE_SEARCH_URL + URLEncoder.encode(keyword, StandardCharsets.UTF_8));
 
-		List<WebElement> cards = aguardarElementos(By.cssSelector(selectors.getCardContainer()));
+		List<WebElement> cards;
+		try {
+			cards = aguardarElementos(By.cssSelector(selectors.getCardContainer()));
+		} catch (TimeoutException e) {
+			return List.of();
+		}
 
 		List<ScrapedProductDTO> produtos = new ArrayList<>();
 		for (WebElement card : cards) {

@@ -117,29 +117,29 @@ O bot precisa descobrir produtos das 5 categorias-alvo (monitores, notebooks, pe
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| SCRAPE-01 | P1: Coleta por categoria | Design | Pending |
-| SCRAPE-02 | P1: Coleta por categoria | Design | Pending |
-| SCRAPE-03 | P1: Coleta por categoria | Design | Pending |
-| SCRAPE-04 | P1: Coleta por categoria | Design | Pending |
-| SCRAPE-05 | P1: Coleta por categoria | Design | Pending |
-| SCRAPE-06 | P1: Coleta por categoria | Design | Pending |
-| SCRAPE-07 | P1: Histórico de preço | Design | Pending |
-| SCRAPE-08 | P1: Histórico de preço | Design | Pending |
-| SCRAPE-09 | P1: Histórico de preço | Design | Pending |
-| SCRAPE-10 | P1: Detecção de queda | Design | Pending |
-| SCRAPE-11 | P1: Detecção de queda | Design | Pending |
-| SCRAPE-12 | P1: Detecção de queda | Design | Pending |
-| SCRAPE-13 | P1: Detecção de queda | Design | Pending |
-| SCRAPE-14 | P2: Fallback cold start | Design | Pending |
-| SCRAPE-15 | P2: Fallback cold start | Design | Pending |
-| SCRAPE-16 | Edge case: falha WebDriver/CAPTCHA | Design | Pending |
-| SCRAPE-17 | Edge case: zero produtos no ciclo | Design | Pending |
+| SCRAPE-01 | P1: Coleta por categoria | Execute | ✅ Verified |
+| SCRAPE-02 | P1: Coleta por categoria | Execute | ✅ Verified |
+| SCRAPE-03 | P1: Coleta por categoria | Execute | ❌ Needs Fix (ver `validation.md` — WARN "categoria sem resultado" é inatingível no caminho real do Selenium) |
+| SCRAPE-04 | P1: Coleta por categoria | Execute | ⚠️ Verified (gap de precisão de teste — log-content não asserido) |
+| SCRAPE-05 | P1: Coleta por categoria | Execute | ✅ Verified |
+| SCRAPE-06 | P1: Coleta por categoria | Execute | ✅ Verified |
+| SCRAPE-07 | P1: Histórico de preço | Execute | ⚠️ Verified (asserção só conta invocações, não conteúdo salvo) |
+| SCRAPE-08 | P1: Histórico de preço | Execute | ⚠️ Verified (requisito negativo, não testável diretamente) |
+| SCRAPE-09 | P1: Histórico de preço | Execute | ✅ Verified |
+| SCRAPE-10 | P1: Detecção de queda | Execute | ✅ Verified |
+| SCRAPE-11 | P1: Detecção de queda | Execute | ⚠️ Verified (valor-padrão 10% seedado mas nunca lido de volta em teste) |
+| SCRAPE-12 | P1: Detecção de queda | Execute | ✅ Verified |
+| SCRAPE-13 | P1: Detecção de queda | Execute | ✅ Verified |
+| SCRAPE-14 | P2: Fallback cold start | Execute | ✅ Verified |
+| SCRAPE-15 | P2: Fallback cold start | Execute | ✅ Verified |
+| SCRAPE-16 | Edge case: falha WebDriver/CAPTCHA | Execute | ⚠️ Verified (gap de precisão de teste — log-content não asserido) |
+| SCRAPE-17 | Edge case: zero produtos no ciclo | Execute | ✅ Verified |
 
 **ID format:** `SCRAPE-NN`
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 17 total, 0 mapped to tasks, 17 unmapped ⚠️ (Design/Tasks ainda não iniciados)
+**Coverage:** 17 total, 17 mapped to tasks (T1-T12), 1 needs fix (SCRAPE-03), 5 verified with flagged gaps, 11 cleanly verified — ver `.specs/features/scraping-coleta/validation.md` para evidência completa
 
 ---
 

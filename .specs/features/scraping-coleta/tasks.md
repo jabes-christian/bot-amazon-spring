@@ -465,6 +465,69 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 ---
 
+### Phase 5: Correções pós-Verifier (fix→re-verify, iteração 1)
+
+> Tasks criadas a partir de `.specs/features/scraping-coleta/validation.md` (Verifier, 2026-09-07, veredito FAIL). Não fazem parte do plano original de 12 tasks — nascem do ciclo fix→re-verify do skill (máx. 3 iterações antes de escalar ao usuário).
+
+### T13: `TimeoutException` de zero-cards vira lista vazia, não ERROR genérico
+
+**What**: Capturar `TimeoutException` especificamente dentro de `AmazonProductScraper.buscarPorKeyword` (em torno da chamada a `aguardarElementos`) e tratá-la como "zero resultados" (retorna `List.of()`), preservando a escalada normal para `ColetaService`'s isolamento por categoria (SCRAPE-16) para qualquer outra exceção — nunca um catch genérico de `Exception`.
+**Where**: `src/main/java/com/jchristian/bot_amazon_spring/scraper/AmazonProductScraper.java`
+**Depends on**: T10
+**Reuses**: Nenhum
+**Requirement**: SCRAPE-03 (fix de gap real encontrado pelo Verifier — `ExpectedConditions.presenceOfAllElementsLocatedBy` lança `TimeoutException` em vez de retornar lista vazia quando zero elementos são encontrados)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] `buscarPorKeyword` captura `org.openqa.selenium.TimeoutException` (só esse tipo, não `Exception`/`WebDriverException` genéricos) ao redor de `aguardarElementos` e retorna `List.of()` nesse caso
+- [x] Teste com `driver.findElements(...)` sempre retornando lista vazia confirma que `buscarPorKeyword` retorna `List.of()` sem lançar exceção (exercita o `WebDriverWait` real, não um mock que contorna a semântica do Selenium)
+- [x] Teste separado confirma que uma exceção que NÃO é `TimeoutException` (ex.: `WebDriverException` de driver morto) continua propagando normalmente, não é engolida
+- [x] Gate check passa: `mvn test`
+- [x] Test count: 2 testes novos passam (6 anteriores de `AmazonProductScraperTest` continuam passando), 0 falhas
+
+**Tests**: unit
+**Gate**: quick
+
+**Status**: ✅ Complete
+
+**Commit**: `fix(scraping-coleta): trata TimeoutException de zero-cards como lista vazia (SCRAPE-03)`
+
+---
+
+### T14: Reforço de asserções de conteúdo (log e dados salvos)
+
+**What**: Adicionar asserções de conteúdo onde hoje só há comportamento/contagem comprovados: `ListAppender` para o texto do WARN de SCRAPE-04 (ASIN+valor) e do ERROR de SCRAPE-16 (categoria) em `ColetaServiceTest`; `argThat` para o `PriceHistory` salvo (ASIN/preço) em `ColetaServiceTest` (SCRAPE-07/09); e uma asserção do valor semeado `'10'` para `coleta.percentual-minimo-queda` em `BotAmazonSpringApplicationIT` (SCRAPE-11).
+**Where**: `src/test/java/com/jchristian/bot_amazon_spring/service/ColetaServiceTest.java`, `src/test/java/com/jchristian/bot_amazon_spring/BotAmazonSpringApplicationIT.java`
+**Depends on**: T11
+**Reuses**: Padrão de `ListAppender` já usado em `cicloComZeroProdutosExtraidosLogaWarnENaoLancaExcecao` (SCRAPE-17)
+**Requirement**: SCRAPE-04, SCRAPE-07, SCRAPE-09, SCRAPE-11, SCRAPE-16
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] Teste de preço fora da faixa (SCRAPE-04) confirma via `ListAppender` que o WARN loga o ASIN e o valor bruto do produto descartado
+- [ ] Teste de falha isolada por categoria (SCRAPE-16) confirma via `ListAppender` que o ERROR loga a categoria afetada
+- [ ] Teste de histórico (SCRAPE-07/09) usa `argThat` para confirmar que o `PriceHistory` salvo tem o ASIN/preço corretos, não só a contagem de chamadas
+- [ ] `BotAmazonSpringApplicationIT` (ou um teste de integração dedicado) confirma que `app_config` tem `chave='coleta.percentual-minimo-queda'` com `valor='10'` (SCRAPE-11)
+- [ ] Gate check passa: `mvn verify` (mistura unit + integration)
+- [ ] Test count: testes existentes fortalecidos (não novos testes adicionais, exceto a asserção de valor de T14's último item), 0 falhas
+
+**Tests**: unit, integration
+**Gate**: full
+
+**Commit**: `test(scraping-coleta): reforça asserções de conteúdo de log e dados salvos (SCRAPE-04/07/09/11/16)`
+
+---
+
 ## Phase Execution Map
 
 Visual representation of task ordering. Phases run in sequence, and tasks within a phase run in order:
