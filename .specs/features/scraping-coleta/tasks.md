@@ -343,13 +343,15 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] Construção com todos os campos obrigatórios preenchidos funciona (asin, título, preço atual, imagem, URL do produto; preço riscado é opcional/nullable)
-- [ ] Construção com asin, título ou preço atual nulo/vazio lança exceção no construtor compacto
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 4 testes passam (1 caminho feliz + 3 validações), 0 falhas
+- [x] Construção com todos os campos obrigatórios preenchidos funciona (asin, título, preço atual, imagem, URL do produto; preço riscado é opcional/nullable)
+- [x] Construção com asin, título ou preço atual nulo/vazio lança exceção no construtor compacto
+- [x] Gate check passa: `mvn test`
+- [x] Test count: 4 testes passam (1 caminho feliz + 3 validações), 0 falhas
 
 **Tests**: unit
 **Gate**: quick
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona ScrapedProductDTO`
 
