@@ -162,14 +162,16 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] `getBigDecimal`/`getInt`/`getLong` retornam o valor convertido quando a chave existe em `app_config`
-- [ ] Cada método retorna o valor padrão e loga WARN quando a chave está ausente (mockando `AppConfigRepository.findByChave` retornando `Optional.empty()`)
-- [ ] Nenhum método lança exceção para chave ausente
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 6 testes passam (2 por método: chave presente, chave ausente), 0 falhas
+- [x] `getBigDecimal`/`getInt`/`getLong` retornam o valor convertido quando a chave existe em `app_config`
+- [x] Cada método retorna o valor padrão e loga WARN quando a chave está ausente (mockando `AppConfigRepository.findByChave` retornando `Optional.empty()`)
+- [x] Nenhum método lança exceção para chave ausente
+- [x] Gate check passa: `mvn test`
+- [x] Test count: 6 testes passam (2 por método: chave presente, chave ausente), 0 falhas
 
 **Tests**: unit
 **Gate**: quick
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona ConfigService para leitura de limiares em app_config`
 
