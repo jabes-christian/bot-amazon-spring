@@ -446,18 +446,20 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] Produto com ≥2 entradas de histórico usa o menor preço já registrado como base (SCRAPE-10)
-- [ ] Percentual mínimo padrão de 10% é lido via `ConfigService`, configurável sem alteração de código (SCRAPE-12)
-- [ ] Produto sinalizado retorna `CandidatoPromocaoDTO` com o percentual de desconto calculado corretamente (SCRAPE-11 → contrato com `canais-disparo`, ver revisão em `design.md`)
-- [ ] Produto cujo preço atual não mudou desde o último candidato sinalizado (`lastCandidatoPreco == precoAtual`) não é sinalizado de novo (SCRAPE-13)
-- [ ] Produto com <2 entradas de histórico E preço riscado presente usa o preço riscado como base (SCRAPE-14)
-- [ ] Produto com <2 entradas de histórico E sem preço riscado não é sinalizado, por falta de base de comparação (SCRAPE-15)
-- [ ] `lastCandidatoPreco` é atualizado como efeito colateral quando um produto é sinalizado
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 6 testes passam (1 por comportamento acima), 0 falhas
+- [x] Produto com ≥2 entradas de histórico usa o menor preço já registrado como base (SCRAPE-10)
+- [x] Percentual mínimo padrão de 10% é lido via `ConfigService`, configurável sem alteração de código (SCRAPE-12)
+- [x] Produto sinalizado retorna `CandidatoPromocaoDTO` com o percentual de desconto calculado corretamente (SCRAPE-11 → contrato com `canais-disparo`, ver revisão em `design.md`)
+- [x] Produto cujo preço atual não mudou desde o último candidato sinalizado (`lastCandidatoPreco == precoAtual`) não é sinalizado de novo (SCRAPE-13)
+- [x] Produto com <2 entradas de histórico E preço riscado presente usa o preço riscado como base (SCRAPE-14)
+- [x] Produto com <2 entradas de histórico E sem preço riscado não é sinalizado, por falta de base de comparação (SCRAPE-15)
+- [x] `lastCandidatoPreco` é atualizado como efeito colateral quando um produto é sinalizado
+- [x] Gate check passa: `mvn test`
+- [x] Test count: 6 testes passam (1 por comportamento acima), 0 falhas
 
 **Tests**: unit
 **Gate**: quick
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona PromotionDetectionService (detecção de queda de preço)`
 
