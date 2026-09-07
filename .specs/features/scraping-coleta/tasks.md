@@ -409,19 +409,21 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] Para cada categoria ativa (via `CategoriaColetaRepository.findByAtivoTrue()`), chama `AmazonProductScraper.buscarPorKeyword` com a keyword da categoria (SCRAPE-01)
-- [ ] Categoria sem resultado loga WARN com categoria+keyword e segue para a próxima (SCRAPE-01/edge case)
-- [ ] Preço ≤R$0 ou >R$50.000 descarta o produto do ciclo e loga WARN com ASIN+valor bruto (SCRAPE-04), lendo os limiares via `ConfigService`
-- [ ] Produto com ASIN já existente é atualizado (título, preço, imagem), nunca duplicado (SCRAPE-05)
-- [ ] Toda passagem por um produto grava uma entrada de `PriceHistory` com ASIN+preço+timestamp, sem deduplicar por dia (SCRAPE-07, SCRAPE-09)
-- [ ] Aguarda o intervalo configurável (via `ConfigService`) entre categorias distintas (SCRAPE-06)
-- [ ] Exceção lançada ao processar uma categoria é capturada, logada em ERROR com a categoria afetada, e não interrompe as demais categorias (SCRAPE-16)
-- [ ] Se o ciclo inteiro extrair zero produtos, loga WARN de nível operacional, não erro fatal (SCRAPE-17)
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 8 testes passam (1 por comportamento acima), 0 falhas
+- [x] Para cada categoria ativa (via `CategoriaColetaRepository.findByAtivoTrue()`), chama `AmazonProductScraper.buscarPorKeyword` com a keyword da categoria (SCRAPE-01)
+- [x] Categoria sem resultado loga WARN com categoria+keyword e segue para a próxima (SCRAPE-01/edge case)
+- [x] Preço ≤R$0 ou >R$50.000 descarta o produto do ciclo e loga WARN com ASIN+valor bruto (SCRAPE-04), lendo os limiares via `ConfigService`
+- [x] Produto com ASIN já existente é atualizado (título, preço, imagem), nunca duplicado (SCRAPE-05)
+- [x] Toda passagem por um produto grava uma entrada de `PriceHistory` com ASIN+preço+timestamp, sem deduplicar por dia (SCRAPE-07, SCRAPE-09)
+- [x] Aguarda o intervalo configurável (via `ConfigService`) entre categorias distintas (SCRAPE-06)
+- [x] Exceção lançada ao processar uma categoria é capturada, logada em ERROR com a categoria afetada, e não interrompe as demais categorias (SCRAPE-16)
+- [x] Se o ciclo inteiro extrair zero produtos, loga WARN de nível operacional (verificado via Logback `ListAppender`, não só ausência de exceção), não erro fatal (SCRAPE-17)
+- [x] Gate check passa: `mvn test`
+- [x] Test count: 8 testes passam (1 por comportamento acima), 0 falhas
 
 **Tests**: unit
 **Gate**: quick
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona ColetaService (orquestração do ciclo de coleta)`
 
