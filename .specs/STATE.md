@@ -75,6 +75,12 @@
 - **Date**: 2026-09-03
 - **Status**: active
 
+## Deferred Ideas
+
+Itens que não bloqueiam a feature corrente, capturados para não se perderem no histórico do chat (não são Decisions — nada aqui foi decidido, só sinalizado para revisão futura).
+
+- **WebDriver instanciado em todo `@SpringBootTest` de contexto completo** (descoberto durante Execute de `scraping-coleta`, T7): sem `spring.main.lazy-initialization`, o bean `WebDriver` de `SeleniumConfig` sobe eagerly em qualquer teste de contexto completo — inclusive testes que nada têm a ver com Selenium (ex.: `BotAmazonSpringApplicationIT`, que só testa a migration Flyway). Hoje não bloqueia nada porque a máquina de dev tem Chrome instalado e o WebDriverManager resolve o driver rápido, mas isso torna `mvn verify` local dependente de um Chrome instalável, não só de Docker — uma dependência ambiental implícita do gate que não está documentada em lugar nenhum. **Candidato natural para `operacao-docker`** (feature dona do ambiente de execução/CI) avaliar quando essa feature for desenhada: opções possíveis incluem `spring.main.lazy-initialization=true` (efeito colateral: atrasa a detecção de erro de wiring de outros beans para o primeiro uso, não na subida), um profile de teste que sobrepõe o bean `WebDriver` por um mock/stub, ou simplesmente documentar Chrome como pré-requisito de ambiente de dev. Não resolvido agora — só registrado.
+
 ## Handoff
 
 - **Feature**: `scraping-coleta` — `tasks.md` aprovado, iniciando Fase 5 (Execute), task T1

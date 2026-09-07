@@ -285,12 +285,14 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] Bean `WebDriver` usa `RemoteWebDriver` quando a propriedade está preenchida, `ChromeDriver` local quando vazia
-- [ ] `ChromeOptions` inclui modo headless e um user-agent realista
-- [ ] Gate check passa: `mvn clean verify` (sem teste dedicado — bean de configuração depende de driver de navegador real; comportamento coberto indiretamente quando `AmazonProductScraper`, T10, for exercitado)
+- [x] Bean `WebDriver` usa `RemoteWebDriver` quando a propriedade está preenchida, `ChromeDriver` local quando vazia
+- [x] `ChromeOptions` inclui modo headless e um user-agent realista
+- [x] Gate check passa: `mvn clean verify` (sem teste dedicado — bean de configuração depende de driver de navegador real; comportamento coberto indiretamente quando `AmazonProductScraper`, T10, for exercitado)
 
 **Tests**: none
 **Gate**: build
+
+**Status**: ✅ Complete
 
 **Commit**: `feat(scraping-coleta): adiciona SeleniumConfig (bean WebDriver local/remoto)`
 
