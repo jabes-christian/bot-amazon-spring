@@ -514,15 +514,17 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 **Done when**:
 
-- [ ] Teste de preço fora da faixa (SCRAPE-04) confirma via `ListAppender` que o WARN loga o ASIN e o valor bruto do produto descartado
-- [ ] Teste de falha isolada por categoria (SCRAPE-16) confirma via `ListAppender` que o ERROR loga a categoria afetada
-- [ ] Teste de histórico (SCRAPE-07/09) usa `argThat` para confirmar que o `PriceHistory` salvo tem o ASIN/preço corretos, não só a contagem de chamadas
-- [ ] `BotAmazonSpringApplicationIT` (ou um teste de integração dedicado) confirma que `app_config` tem `chave='coleta.percentual-minimo-queda'` com `valor='10'` (SCRAPE-11)
-- [ ] Gate check passa: `mvn verify` (mistura unit + integration)
-- [ ] Test count: testes existentes fortalecidos (não novos testes adicionais, exceto a asserção de valor de T14's último item), 0 falhas
+- [x] Teste de preço fora da faixa (SCRAPE-04) confirma via `ListAppender` que o WARN loga o ASIN e o valor bruto do produto descartado
+- [x] Teste de falha isolada por categoria (SCRAPE-16) confirma via `ListAppender` que o ERROR loga a categoria afetada
+- [x] Teste de histórico (SCRAPE-07/09) usa `argThat`/`ArgumentCaptor` para confirmar que os `PriceHistory` salvos têm o ASIN/preço corretos, não só a contagem de chamadas
+- [x] `BotAmazonSpringApplicationIT` confirma que `app_config` tem `chave='coleta.percentual-minimo-queda'` com `valor='10'` (SCRAPE-11)
+- [x] Gate check passa: `mvn verify` (mistura unit + integration)
+- [x] Test count: testes existentes fortalecidos (nenhum teste novo adicionado, só asserções extras nos já existentes), 0 falhas
 
 **Tests**: unit, integration
 **Gate**: full
+
+**Status**: ✅ Complete
 
 **Commit**: `test(scraping-coleta): reforça asserções de conteúdo de log e dados salvos (SCRAPE-04/07/09/11/16)`
 

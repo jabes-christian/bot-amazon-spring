@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.jchristian.bot_amazon_spring.dto.ScrapedProductDTO;
 import com.jchristian.bot_amazon_spring.entity.CategoriaColeta;
+import com.jchristian.bot_amazon_spring.entity.PriceHistory;
 import com.jchristian.bot_amazon_spring.entity.Product;
 import com.jchristian.bot_amazon_spring.repository.CategoriaColetaRepository;
 import com.jchristian.bot_amazon_spring.repository.PriceHistoryRepository;
@@ -13,6 +14,7 @@ import com.jchristian.bot_amazon_spring.repository.ProductRepository;
 import com.jchristian.bot_amazon_spring.scraper.AmazonProductScraper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
@@ -108,11 +110,23 @@ class ColetaServiceTest {
 		when(productRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 		stubLimiaresDePreco();
 
-		novoService().executarCicloColeta();
+		Logger logger = (Logger) LoggerFactory.getLogger(ColetaService.class);
+		ListAppender<ILoggingEvent> appender = new ListAppender<>();
+		appender.start();
+		logger.addAppender(appender);
 
-		verify(productRepository, times(1)).save(any());
-		verify(productRepository).save(argThat(p -> ((Product) p).getAsin().equals("B0VALIDO")));
-		verify(productRepository, never()).findByAsin("B0INVALIDO");
+		try {
+			novoService().executarCicloColeta();
+
+			verify(productRepository, times(1)).save(any());
+			verify(productRepository).save(argThat(p -> ((Product) p).getAsin().equals("B0VALIDO")));
+			verify(productRepository, never()).findByAsin("B0INVALIDO");
+			assertThat(appender.list).anyMatch(evento -> evento.getLevel() == Level.WARN
+					&& evento.getFormattedMessage().contains("B0INVALIDO")
+					&& evento.getFormattedMessage().contains("60000.00"));
+		} finally {
+			logger.detachAppender(appender);
+		}
 	}
 
 	@Test
@@ -150,7 +164,15 @@ class ColetaServiceTest {
 
 		novoService().executarCicloColeta();
 
-		verify(priceHistoryRepository, times(2)).save(any());
+		ArgumentCaptor<PriceHistory> capturado = ArgumentCaptor.forClass(PriceHistory.class);
+		verify(priceHistoryRepository, times(2)).save(capturado.capture());
+
+		List<PriceHistory> salvos = capturado.getAllValues();
+		assertThat(salvos).extracting(ph -> ph.getProduct().getAsin()).containsExactlyInAnyOrder("B0A", "B0B");
+		assertThat(salvos.stream().filter(ph -> ph.getProduct().getAsin().equals("B0A")).findFirst().orElseThrow()
+				.getPreco()).isEqualByComparingTo("100.00");
+		assertThat(salvos.stream().filter(ph -> ph.getProduct().getAsin().equals("B0B")).findFirst().orElseThrow()
+				.getPreco()).isEqualByComparingTo("200.00");
 	}
 
 	@Test
@@ -176,9 +198,20 @@ class ColetaServiceTest {
 		when(productRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 		stubLimiaresDePreco();
 
-		assertDoesNotThrow(() -> novoService().executarCicloColeta());
+		Logger logger = (Logger) LoggerFactory.getLogger(ColetaService.class);
+		ListAppender<ILoggingEvent> appender = new ListAppender<>();
+		appender.start();
+		logger.addAppender(appender);
 
-		verify(productRepository).save(argThat(p -> ((Product) p).getAsin().equals("B0Y")));
+		try {
+			assertDoesNotThrow(() -> novoService().executarCicloColeta());
+
+			verify(productRepository).save(argThat(p -> ((Product) p).getAsin().equals("B0Y")));
+			assertThat(appender.list).anyMatch(
+					evento -> evento.getLevel() == Level.ERROR && evento.getFormattedMessage().contains("MONITOR"));
+		} finally {
+			logger.detachAppender(appender);
+		}
 	}
 
 	@Test

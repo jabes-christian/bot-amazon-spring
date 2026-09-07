@@ -35,6 +35,10 @@ class BotAmazonSpringApplicationIT {
 
 		Integer appConfigSeed = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM app_config", Integer.class);
 		assertThat(appConfigSeed).isEqualTo(4);
+
+		String percentualMinimoQueda = jdbcTemplate.queryForObject(
+				"SELECT valor FROM app_config WHERE chave = 'coleta.percentual-minimo-queda'", String.class);
+		assertThat(percentualMinimoQueda).isEqualTo("10");
 	}
 
 }
