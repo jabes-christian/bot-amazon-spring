@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long> {
@@ -15,5 +16,8 @@ public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long
 
 	@Query("SELECT MIN(ph.preco) FROM PriceHistory ph WHERE ph.product = :product")
 	Optional<BigDecimal> findMenorPrecoByProduct(@Param("product") Product product);
+
+	@Query("SELECT MIN(ph.preco) FROM PriceHistory ph WHERE ph.product = :product AND ph.capturadoEm >= :desde")
+	Optional<BigDecimal> findMenorPrecoDesde(@Param("product") Product product, @Param("desde") LocalDateTime desde);
 
 }

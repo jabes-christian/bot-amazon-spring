@@ -15,6 +15,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,6 +71,38 @@ class PriceHistoryRepositoryIT {
 
 		assertThat(menorPreco).isPresent();
 		assertThat(menorPreco.get()).isEqualByComparingTo("79.90");
+	}
+
+	@Test
+	void findMenorPrecoDesdeIgnoraEntradaMaisAntigaQueAJanela() {
+		PriceHistory antiga = priceHistoryRepository.saveAndFlush(
+				PriceHistory.builder().product(product).preco(new BigDecimal("50.00")).build());
+		antiga.setCapturadoEm(LocalDateTime.now().minusDays(200));
+		priceHistoryRepository.saveAndFlush(antiga);
+
+		priceHistoryRepository.saveAndFlush(PriceHistory.builder().product(product).preco(new BigDecimal("90.00")).build());
+
+		Optional<BigDecimal> menorPrecoDesde =
+				priceHistoryRepository.findMenorPrecoDesde(product, LocalDateTime.now().minusDays(90));
+
+		assertThat(menorPrecoDesde).isPresent();
+		assertThat(menorPrecoDesde.get()).isEqualByComparingTo("90.00");
+	}
+
+	@Test
+	void findMenorPrecoDesdeConsideraEntradaDentroDaJanelaComPrecoMenor() {
+		PriceHistory antiga = priceHistoryRepository.saveAndFlush(
+				PriceHistory.builder().product(product).preco(new BigDecimal("95.00")).build());
+		antiga.setCapturadoEm(LocalDateTime.now().minusDays(200));
+		priceHistoryRepository.saveAndFlush(antiga);
+
+		priceHistoryRepository.saveAndFlush(PriceHistory.builder().product(product).preco(new BigDecimal("60.00")).build());
+
+		Optional<BigDecimal> menorPrecoDesde =
+				priceHistoryRepository.findMenorPrecoDesde(product, LocalDateTime.now().minusDays(90));
+
+		assertThat(menorPrecoDesde).isPresent();
+		assertThat(menorPrecoDesde.get()).isEqualByComparingTo("60.00");
 	}
 
 }
