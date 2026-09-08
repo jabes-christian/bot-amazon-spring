@@ -122,6 +122,8 @@ Duas formas foram consideradas para aplicar esse timeout por chamada:
 - **Dependencies**: `langchain4j-open-ai` (já no `pom.xml`)
 - **Reuses**: Nenhum
 
+**Correção (2026-09-08, durante Execute de T3)**: a assinatura original (`@Value("${openrouter.base-url}")` sem default) quebra **qualquer** teste `@SpringBootTest` de contexto completo — incluindo `BotAmazonSpringApplicationIT`, que nada tem a ver com LLM — porque as env vars `openrouter.*` não existem no ambiente de dev/CI: `PlaceholderResolutionException: Could not resolve placeholder 'openrouter.base-url'`. Mesma classe de gap do bean `WebDriverWait` em `scraping-coleta`/T7 (bean sem default derruba o contexto de testes que não o usam). `OpenAiChatModel.builder().build()` não faz chamada de rede — só a primeira invocação de `.chat(...)` falharia com credenciais vazias, e essa falha já tem tratamento (fallback para template) em `CopyGenerationService` (T4). Corrigido para `@Value("${openrouter.base-url:https://openrouter.ai/api/v1}")`, `@Value("${openrouter.api-key:}")`, `@Value("${openrouter.model:}")` — mesmo padrão de defaults vazios/públicos já usado em `SeleniumConfig` (`selenium.remote.url:`). Credenciais reais continuam vindo de env vars em produção (OPS-09); os defaults aqui só existem para não travar a construção do bean em ambientes sem essas variáveis.
+
 ### `PriceHistoryRepository` (extensão, feature `scraping-coleta`)
 
 - **Purpose**: +1 método para suportar o selo "menor preço em N dias" (P3).
