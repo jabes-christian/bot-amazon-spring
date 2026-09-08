@@ -530,6 +530,42 @@ T12 (task único da fase — depende de T3, T5, T6 da Fase 1)
 
 ---
 
+### Phase 6: Correção de contrato pós-descoberta (durante Tasks phase de `enriquecimento-conteudo`)
+
+> Feature já em Done/Verified. T15 reabre por necessidade de contrato cross-feature descoberta ao desenhar `enriquecimento-conteudo` (ver revisão 2 em `design.md`/`PromotionDetectionService`): a copy/banner precisam do preço-base real da detecção, não de `Product.precoRiscado` (que pode divergir ou ser `null`).
+
+### T15: `CandidatoPromocaoDTO` ganha `precoBase`
+
+**What**: Adicionar o campo `precoBase` (BigDecimal) a `CandidatoPromocaoDTO`, propagado por `PromotionDetectionService.buscarCandidatosElegiveis()` a partir do mesmo `precoBase` já calculado internamente (nenhum cálculo novo — só passa a sair no DTO).
+**Where**: `src/main/java/com/jchristian/bot_amazon_spring/dto/CandidatoPromocaoDTO.java`, `src/main/java/com/jchristian/bot_amazon_spring/service/PromotionDetectionService.java`, `src/test/java/com/jchristian/bot_amazon_spring/service/PromotionDetectionServiceTest.java`
+**Depends on**: None (feature já completa)
+**Reuses**: Nenhum
+**Requirement**: SCRAPE-10, SCRAPE-11, SCRAPE-14 (mesmos requisitos de origem do preço-base, agora também expostos no DTO)
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] `CandidatoPromocaoDTO` tem 3 campos: `produto`, `percentualDesconto`, `precoBase`
+- [x] `PromotionDetectionService` preenche `precoBase` com o mesmo valor usado para decidir a queda relevante (mínimo do histórico ou `precoRiscado`, conforme o caso)
+- [x] Teste de "≥2 histórico usa o menor preço como base" (SCRAPE-10) ganha uma asserção direta sobre `precoBase` (não só sobre `percentualDesconto`) — valor deve ser exatamente o mínimo do histórico usado no teste
+- [x] Teste de cold start com preço riscado (SCRAPE-14) ganha a mesma asserção direta sobre `precoBase` — valor deve ser exatamente `precoRiscado`
+- [x] Todos os demais testes de `PromotionDetectionServiceTest` compilam e passam com a nova assinatura (sem enfraquecer nenhuma asserção existente)
+- [x] Gate check passa: `mvn test`
+- [x] Test count: 6 testes de `PromotionDetectionServiceTest` continuam passando (2 com nova asserção de `precoBase`), 0 falhas
+
+**Tests**: unit
+**Gate**: quick
+
+**Status**: ✅ Complete
+
+**Commit**: `fix(scraping-coleta): expõe precoBase em CandidatoPromocaoDTO (contrato para enriquecimento-conteudo)`
+
+---
+
 ## Phase Execution Map
 
 Visual representation of task ordering. Phases run in sequence, and tasks within a phase run in order:

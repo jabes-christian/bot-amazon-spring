@@ -40,7 +40,7 @@ public class PromotionDetectionService {
 					&& product.getPrecoAtual().compareTo(product.getLastCandidatoPreco()) == 0;
 
 			if (quedaRelevante && !jaSinalizadoNessePreco) {
-				candidatos.add(new CandidatoPromocaoDTO(product, percentualDesconto));
+				candidatos.add(new CandidatoPromocaoDTO(product, percentualDesconto, precoBase));
 				product.setLastCandidatoPreco(product.getPrecoAtual());
 				productRepository.save(product);
 			}

@@ -94,6 +94,8 @@ graph TD
 
 ### `DisparoService`
 
+> **Revisão (2026-09-07, durante a escrita do `tasks.md` de `enriquecimento-conteudo` — gap ENRICH-07 encontrado no autoaudit cross-spec)**: `ConteudoEnriquecidoDTO` ganhou o campo `copyViaLlm` (ver revisão no design de `enriquecimento-conteudo`) especificamente para que esta feature possa satisfazer ENRICH-07 ("registrar, ao fim do ciclo, quantos produtos usaram copy LLM vs. template") — requisito que nenhum dos dois designs cobria antes. Passo 4 abaixo ganhou a contagem; passo 6 é novo.
+
 - **Purpose**: Orquestrar um ciclo de disparo completo (seleção por canal + execução por produto, ver Architecture Overview).
 - **Location**: `service/DisparoService.java`
 - **Interfaces**:
@@ -103,8 +105,9 @@ graph TD
   1. `candidatos = promotionDetectionService.buscarCandidatosElegiveis()` — 1x
   2. Para cada canal ativo (`ChannelRepository.findByAtivoTrue()`): se `categoriasAceitas` vazio/nulo → WARN, pula (DISPATCH-26/edge case); senão filtra `candidatos` por categoria aceita, remove os com `DispatchHistoryRepository.existsByProductAndChannelAndEnviadoEmAfter(...)` dentro da janela, ordena por `percentualDesconto` desc, pega até o teto configurado — acumula em `Map<Product, Set<Channel>>`
   3. Se nenhum canal ativo → log INFO "nenhum canal ativo", encerra sem erro (edge case DISPATCH-25)
-  4. Para cada `(produto, canais)` do mapa: `conteudo = enriquecimentoService.enriquecer(produto)`; para cada canal desse conjunto: tenta enviar (com 1 retry imediato em falha), grava `DispatchHistory` só em sucesso, loga ERROR em falha final sem interromper os demais; dorme o intervalo configurado após cada tentativa (sucesso ou falha)
+  4. Para cada `(produto, canais)` do mapa: `conteudo = enriquecimentoService.enriquecer(produto)`; incrementa um contador local (`copiasViaLlm`/`copiasViaTemplate`) conforme `conteudo.copyViaLlm()` (ENRICH-07); para cada canal desse conjunto: tenta enviar (com 1 retry imediato em falha), grava `DispatchHistory` só em sucesso, loga ERROR em falha final sem interromper os demais; dorme o intervalo configurado após cada tentativa (sucesso ou falha)
   5. Após todos os canais desse produto: se `conteudo.bannerPath() != null`, `bannerImageService.removerBanner(conteudo.bannerPath())`
+  6. Ao final do ciclo (depois do loop do passo 4): loga INFO/WARN com a contagem total (`copiasViaLlm`, `copiasViaTemplate`) — satisfaz ENRICH-07
 
 ### `ChannelSender` (interface) + `TelegramChannelSender` + `WhatsAppChannelSender`
 
@@ -201,3 +204,5 @@ Feita a pedido do usuário antes da aprovação, para não descobrir gaps só na
 - **Envio (DISPATCH-13..18)**: usa `ConteudoEnriquecidoDTO.copy()`/`bannerPath()` (já expostos pelo contrato fechado) e `Channel.identificador` (própria desta feature) — cobertos, com o mimetype/extensão do banner agora fixado.
 - **Dedup (DISPATCH-19..21)**: usa `Product` (para a FK de `DispatchHistory`) e `Channel` — ambos já modelados, sem dado externo faltando.
 - **Isolamento/retry (DISPATCH-22..24)** e **edge cases (DISPATCH-25..26)**: inteiramente internos a esta feature, sem dependência de dado externo.
+
+> **Atualização (2026-09-07, durante a escrita do `tasks.md` de `enriquecimento-conteudo`)**: esta auditoria original não é de `canais-disparo` (ENRICH-07 é requisito de `enriquecimento-conteudo`), mas a implementação de ENRICH-07 só é possível com a colaboração desta feature (dona do "ciclo"). Um 2º gap cross-feature apareceu depois desta auditoria: `ConteudoEnriquecidoDTO` não threadava a origem da copy (LLM vs. template) até esta revisão. Corrigido — ver `DisparoService`, passos 4 e 6 acima.

@@ -63,6 +63,7 @@ class PromotionDetectionServiceTest {
 
 		assertThat(candidatos).hasSize(1);
 		assertThat(candidatos.get(0).percentualDesconto()).isEqualByComparingTo("20.00");
+		assertThat(candidatos.get(0).precoBase()).isEqualByComparingTo("100.00");
 	}
 
 	@Test
@@ -122,6 +123,7 @@ class PromotionDetectionServiceTest {
 
 		assertThat(candidatos).hasSize(1);
 		assertThat(candidatos.get(0).percentualDesconto()).isEqualByComparingTo("20.00");
+		assertThat(candidatos.get(0).precoBase()).isEqualByComparingTo("100.00");
 		verify(priceHistoryRepository, never()).findMenorPrecoByProduct(any());
 	}
 

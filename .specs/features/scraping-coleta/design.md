@@ -107,19 +107,21 @@ Não há código local reaproveitável (repositório é um esqueleto vazio). O r
 ### `PromotionDetectionService`
 
 > **Revisão (durante o Design de `canais-disparo`)**: o retorno original desta interface era `List<Product>`. Ao desenhar `canais-disparo`, ficou claro que DISPATCH-10 ("ordenar candidatos por percentual de desconto decrescente") precisa desse percentual — e ele só existe no instante da detecção (é `(precoBase - precoAtual) / precoBase`; `precoBase` não fica armazenado em `Product`, e `lastCandidatoPreco` já é sobrescrito pelo valor novo antes do método retornar). Sem essa mudança, `canais-disparo` teria que recalcular a mesma regra de negócio por fora, duplicando-a. Retorno alterado para `List<CandidatoPromocaoDTO>`, chamado exatamente uma vez por ciclo de disparo (nunca uma vez por canal — ver design de `canais-disparo`, Architecture Overview).
+>
+> **Revisão 2 (2026-09-07, durante a escrita do `tasks.md` de `enriquecimento-conteudo`, feature já commitada/verificada sendo reaberta)**: ENRICH-01/ENRICH-08 exigem que a copy/banner mostrem preço "de" e "por", não só o percentual. `Product.precoRiscado` (a marcação "de/por" da própria página da Amazon) **não é a mesma coisa** que a base real usada por esta detecção uma vez que o produto tem ≥2 entradas de histórico (nesse caso a base é o mínimo do histórico, SCRAPE-10) — poderiam divergir, ou `precoRiscado` poderia estar `null` num produto flagado só via histórico. Para a copy/banner mostrarem exatamente o preço que motivou a promoção (nunca um valor divergente ou ausente), `CandidatoPromocaoDTO` ganha um 3º campo, `precoBase`, junto com o `percentualDesconto` já existente — mesmo valor, já calculado nesta task, sem custo adicional.
 
-- **Purpose**: Determinar quais produtos têm queda de preço relevante, usando o histórico como fonte de verdade (D8) com fallback de cold start, retornando também o percentual de desconto calculado.
+- **Purpose**: Determinar quais produtos têm queda de preço relevante, usando o histórico como fonte de verdade (D8) com fallback de cold start, retornando também o percentual de desconto e o preço-base calculados.
 - **Location**: `src/main/java/com/jchristian/bot_amazon_spring/service/PromotionDetectionService.java`
 - **Interfaces**:
-  - `List<CandidatoPromocaoDTO> buscarCandidatosElegiveis(): List<CandidatoPromocaoDTO>` — para cada `Product`: calcula preço-base de comparação (mínimo do histórico se ≥ 2 entradas, senão `precoRiscado` se presente, senão pula o produto); se `precoAtual <= precoBase * (1 - percentualMinimo)` **e** `precoAtual != lastCandidatoPreco` → inclui `new CandidatoPromocaoDTO(product, percentualDesconto)` no resultado e atualiza `lastCandidatoPreco = precoAtual`
+  - `List<CandidatoPromocaoDTO> buscarCandidatosElegiveis(): List<CandidatoPromocaoDTO>` — para cada `Product`: calcula preço-base de comparação (mínimo do histórico se ≥ 2 entradas, senão `precoRiscado` se presente, senão pula o produto); se `precoAtual <= precoBase * (1 - percentualMinimo)` **e** `precoAtual != lastCandidatoPreco` → inclui `new CandidatoPromocaoDTO(product, percentualDesconto, precoBase)` no resultado e atualiza `lastCandidatoPreco = precoAtual`
 - **Dependencies**: `ProductRepository`, `PriceHistoryRepository`, `ConfigService`
 - **Reuses**: Nenhum
 
 ### `CandidatoPromocaoDTO`
 
-- **Purpose**: Carregar, junto com o `Product`, o percentual de desconto calculado no momento da detecção — para `canais-disparo` ordenar/priorizar sem recalcular a regra de negócio.
+- **Purpose**: Carregar, junto com o `Product`, o percentual de desconto e o preço-base calculados no momento da detecção — para `canais-disparo` ordenar/priorizar e para `enriquecimento-conteudo` montar copy/banner, sem recalcular a regra de negócio nem divergir do valor que motivou a promoção.
 - **Location**: `src/main/java/com/jchristian/bot_amazon_spring/dto/CandidatoPromocaoDTO.java`
-- **Interfaces**: `record CandidatoPromocaoDTO(Product produto, BigDecimal percentualDesconto)`
+- **Interfaces**: `record CandidatoPromocaoDTO(Product produto, BigDecimal percentualDesconto, BigDecimal precoBase)`
 - **Dependencies**: Nenhuma
 - **Reuses**: Nenhum
 
