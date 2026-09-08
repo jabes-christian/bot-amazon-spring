@@ -216,6 +216,8 @@ T6 (depende de T4 e T5, cross-phase)
 - [ ] Gate check passa: `mvn verify`
 - [ ] Test count: 5 testes passam (1 por comportamento acima, exceto o pom.xml/properties que não têm teste dedicado), 0 falhas
 
+**Gap de cobertura conhecido (registrado em 2026-09-08, durante Execute)**: timeout de socket real não é simulado em `BannerImageServiceIT` — `MockRestServiceServer` é síncrono e não injeta latência, então o teste de "download falha" (`downloadComErroHttpRetornaOptionalEmptyELogaWarnComAsinEMotivo`) cobre erro HTTP (500), não timeout. Isso é aceitável porque `gerarBanner` trata timeout e erro HTTP no mesmo `catch (RestClientException e)` — `ResourceAccessException` (timeout) e `HttpServerErrorException`/`HttpClientErrorException` (erro HTTP) são ambas subtipos de `RestClientException` — e o valor de timeout em si (`spring.http.clients.read-timeout`) é configuração padrão do `RestClient` do Spring, não lógica própria desta feature. Se quiser um teste dedicado de timeout real (ex.: via WireMock com delay), não implementado agora — só sinalizado.
+
 **Tests**: integration
 **Gate**: full
 
