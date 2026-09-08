@@ -95,6 +95,8 @@ graph TD
 ### `DisparoService`
 
 > **Revisão (2026-09-07, durante a escrita do `tasks.md` de `enriquecimento-conteudo` — gap ENRICH-07 encontrado no autoaudit cross-spec)**: `ConteudoEnriquecidoDTO` ganhou o campo `copyViaLlm` (ver revisão no design de `enriquecimento-conteudo`) especificamente para que esta feature possa satisfazer ENRICH-07 ("registrar, ao fim do ciclo, quantos produtos usaram copy LLM vs. template") — requisito que nenhum dos dois designs cobria antes. Passo 4 abaixo ganhou a contagem; passo 6 é novo.
+>
+> **Revisão 2 (2026-09-07, mesma sessão — gap adicional)**: `EnriquecimentoService.enriquecer` passou a receber `CandidatoPromocaoDTO` (não `Product` isolado — ver revisão em `enriquecimento-conteudo`/design.md), porque a copy/banner precisam do `precoBase`/`percentualDesconto` que motivou a detecção, não reconstituíveis de forma confiável a partir de `Product` sozinho. O passo 2 original descartava o `CandidatoPromocaoDTO` cedo demais, guardando só `Product` como chave do mapa de seleção. Corrigido: passo 1 agora também constrói um lookup `Map<Product, CandidatoPromocaoDTO>`; passo 4 usa esse lookup para recuperar o `CandidatoPromocaoDTO` completo antes de chamar `enriquecer`.
 
 - **Purpose**: Orquestrar um ciclo de disparo completo (seleção por canal + execução por produto, ver Architecture Overview).
 - **Location**: `service/DisparoService.java`
@@ -102,10 +104,10 @@ graph TD
   - `void executarCicloDisparo(): void`
 - **Dependencies**: `PromotionDetectionService`, `ChannelRepository`, `DispatchHistoryRepository`, `EnriquecimentoService`, `BannerImageService`, `TelegramChannelSender`, `WhatsAppChannelSender`, `ConfigService`
 - **Lógica** (resumo, a task de Execute detalha):
-  1. `candidatos = promotionDetectionService.buscarCandidatosElegiveis()` — 1x
+  1. `candidatos = promotionDetectionService.buscarCandidatosElegiveis()` — 1x; monta `candidatoPorProduto = candidatos.stream().collect(toMap(CandidatoPromocaoDTO::produto, c -> c))` para lookup O(1) no passo 4 (sem isso, o `CandidatoPromocaoDTO` completo — com `precoBase`/`percentualDesconto` — se perderia depois do passo 2, que indexa só por `Product`)
   2. Para cada canal ativo (`ChannelRepository.findByAtivoTrue()`): se `categoriasAceitas` vazio/nulo → WARN, pula (DISPATCH-26/edge case); senão filtra `candidatos` por categoria aceita, remove os com `DispatchHistoryRepository.existsByProductAndChannelAndEnviadoEmAfter(...)` dentro da janela, ordena por `percentualDesconto` desc, pega até o teto configurado — acumula em `Map<Product, Set<Channel>>`
   3. Se nenhum canal ativo → log INFO "nenhum canal ativo", encerra sem erro (edge case DISPATCH-25)
-  4. Para cada `(produto, canais)` do mapa: `conteudo = enriquecimentoService.enriquecer(produto)`; incrementa um contador local (`copiasViaLlm`/`copiasViaTemplate`) conforme `conteudo.copyViaLlm()` (ENRICH-07); para cada canal desse conjunto: tenta enviar (com 1 retry imediato em falha), grava `DispatchHistory` só em sucesso, loga ERROR em falha final sem interromper os demais; dorme o intervalo configurado após cada tentativa (sucesso ou falha)
+  4. Para cada `(produto, canais)` do mapa: `candidato = candidatoPorProduto.get(produto)`; `conteudo = enriquecimentoService.enriquecer(candidato)`; incrementa um contador local (`copiasViaLlm`/`copiasViaTemplate`) conforme `conteudo.copyViaLlm()` (ENRICH-07); para cada canal desse conjunto: tenta enviar (com 1 retry imediato em falha), grava `DispatchHistory` só em sucesso, loga ERROR em falha final sem interromper os demais; dorme o intervalo configurado após cada tentativa (sucesso ou falha)
   5. Após todos os canais desse produto: se `conteudo.bannerPath() != null`, `bannerImageService.removerBanner(conteudo.bannerPath())`
   6. Ao final do ciclo (depois do loop do passo 4): loga INFO/WARN com a contagem total (`copiasViaLlm`, `copiasViaTemplate`) — satisfaz ENRICH-07
 
