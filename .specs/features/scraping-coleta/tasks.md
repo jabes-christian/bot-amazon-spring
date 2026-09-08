@@ -10,7 +10,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 
 **Design**: `.specs/features/scraping-coleta/design.md`
 **Spec**: `.specs/features/scraping-coleta/spec.md`
-**Status**: Done — 14/14 tasks completas, Verifier PASS na iteração 2 (`validation.md`), `validate_state.py` confirma 0 erros
+**Status**: Done — 15/15 tasks completas (12 originais + T13/T14 fix→re-verify + T15 correção de contrato pós-descoberta do gap `precoBase`), Verifier PASS na iteração 2 (`validation.md`), `validate_state.py` confirma 0 erros
 
 ---
 

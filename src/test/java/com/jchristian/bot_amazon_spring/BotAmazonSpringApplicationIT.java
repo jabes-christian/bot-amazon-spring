@@ -34,11 +34,15 @@ class BotAmazonSpringApplicationIT {
 		assertThat(categoriasSeed).isEqualTo(5);
 
 		Integer appConfigSeed = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM app_config", Integer.class);
-		assertThat(appConfigSeed).isEqualTo(4);
+		assertThat(appConfigSeed).isEqualTo(7);
 
 		String percentualMinimoQueda = jdbcTemplate.queryForObject(
 				"SELECT valor FROM app_config WHERE chave = 'coleta.percentual-minimo-queda'", String.class);
 		assertThat(percentualMinimoQueda).isEqualTo("10");
+
+		String llmTimeoutSegundos = jdbcTemplate.queryForObject(
+				"SELECT valor FROM app_config WHERE chave = 'enriquecimento.llm-timeout-segundos'", String.class);
+		assertThat(llmTimeoutSegundos).isEqualTo("15");
 	}
 
 }
