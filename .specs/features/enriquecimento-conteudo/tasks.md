@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/enriquecimento-conteudo/design.md`
-**Status**: Draft
+**Status**: Fase 5 (T7, fix pós-Verifier) em andamento — Verifier iteração 1 (FAIL, `validation.md`) achou 1 gap de cobertura (ENRICH-08); T7 corrige e re-solicita verificação
 
 ---
 
@@ -252,6 +252,36 @@ T6 (depende de T4 e T5, cross-phase)
 **Gate**: quick
 
 **Commit**: `feat(enriquecimento-conteudo): adiciona EnriquecimentoService (orquestração copy+banner)`
+
+---
+
+### Phase 5: Correções pós-Verifier
+
+### T7: Fecha o gap de cobertura ENRICH-08 (+ precisão de log ENRICH-04)
+
+**What**: Verifier iteração 1 (2026-09-08, `validation.md`) retornou FAIL: `BannerImageServiceIT.downloadComSucessoEImagemValidaGeraBannerJpeg800x800` só verificava dimensões/formato do banner, nunca que o overlay de desconto/de-por foi realmente desenhado (ENRICH-08). T7 adiciona uma asserção de pixel/região no teste (mesma técnica já usada no teste do selo): compara a componente verde do fundo puro (fora de qualquer overlay) contra a região da barra escura do overlay, confirmando escurecimento significativo. Também fecha uma nota secundária não-bloqueante do mesmo relatório (ENRICH-04): os testes de exceção/resposta-vazia do LLM só verificavam `viaLlm=false`, sem confirmar o conteúdo do log WARN (o teste de timeout já fazia isso) — estendidos para verificar o log em todos os 3 sub-casos de falha.
+**Where**: `src/test/java/com/jchristian/bot_amazon_spring/service/BannerImageServiceIT.java` (modifica), `src/test/java/com/jchristian/bot_amazon_spring/service/CopyGenerationServiceTest.java` (modifica)
+**Depends on**: T5, T4 (estende testes já escritos nessas tasks)
+**Reuses**: Nenhum código novo — só reforça asserções existentes
+**Requirement**: ENRICH-08, ENRICH-04
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [ ] `downloadComSucessoEImagemValidaGeraBannerJpeg800x800` confirma que a região do overlay de desconto/de-por (barra escura, y=680..800) está significativamente mais escura que o fundo puro da foto do produto (fora de qualquer overlay) — prova estrutural de que algo foi desenhado ali, sem depender de OCR
+- [ ] `excecaoLancadaPeloLlmCaiParaTemplateComViaLlmFalse` confirma o conteúdo do log WARN (ASIN + motivo)
+- [ ] `respostaVaziaDoLlmCaiParaTemplateComViaLlmFalse` confirma o conteúdo do log WARN (ASIN + motivo)
+- [ ] Gate check passa: `mvn verify`
+- [ ] Test count: 0 testes novos (2 testes existentes de `BannerImageServiceIT` e `CopyGenerationServiceTest` ganham asserções adicionais), 0 falhas
+
+**Tests**: integration + unit (extensão de testes já existentes)
+**Gate**: full
+
+**Commit**: `test(enriquecimento-conteudo): fecha gap de cobertura ENRICH-08 e precisão de log ENRICH-04`
 
 ---
 

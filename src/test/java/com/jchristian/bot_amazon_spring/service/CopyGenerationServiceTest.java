@@ -119,6 +119,10 @@ class CopyGenerationServiceTest {
 
 		assertThat(resultado.viaLlm()).isFalse();
 		assertThat(resultado.texto()).contains("Monitor Gamer 27\" 144Hz");
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.WARN
+				&& evento.getFormattedMessage().contains("falha ao gerar copy via LLM")
+				&& evento.getFormattedMessage().contains("B0COPY1")
+				&& evento.getFormattedMessage().contains("rate limit"));
 	}
 
 	@Test
@@ -131,6 +135,10 @@ class CopyGenerationServiceTest {
 
 		assertThat(resultado.viaLlm()).isFalse();
 		assertThat(resultado.texto()).contains("Monitor Gamer 27\" 144Hz");
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.WARN
+				&& evento.getFormattedMessage().contains("falha ao gerar copy via LLM")
+				&& evento.getFormattedMessage().contains("B0COPY1")
+				&& evento.getFormattedMessage().contains("resposta vazia do LLM"));
 	}
 
 	@Test

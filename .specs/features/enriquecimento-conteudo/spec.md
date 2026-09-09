@@ -126,28 +126,28 @@ Um produto candidato (ASIN, título, preço, imagem) não é um post pronto para
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| ENRICH-01 | P1: Geração de copy via LLM | Design | Pending |
-| ENRICH-02 | P1: Geração de copy via LLM | Design | Pending |
-| ENRICH-03 | P1: Geração de copy via LLM | Design | Pending |
-| ENRICH-04 | P1: Geração de copy via LLM | Design | Pending |
-| ENRICH-05 | P1: Fallback de copy por template | Design | Pending |
-| ENRICH-06 | P1: Fallback de copy por template | Design | Pending |
-| ENRICH-07 | P1: Fallback de copy por template | Design | Pending |
-| ENRICH-08 | P1: Composição de banner local | Design | Pending |
-| ENRICH-09 | P1: Composição de banner local | Design | Pending |
-| ENRICH-10 | P1: Composição de banner local | Design | Pending |
-| ENRICH-11 | P1: Composição de banner local | Design | Pending |
-| ENRICH-12 | P1: Envio em modo texto puro | Design | Pending |
-| ENRICH-13 | P1: Envio em modo texto puro | Design | Pending |
-| ENRICH-14 | P3: Selo menor preço em N dias | Design | Pending |
-| ENRICH-15 | Edge case: truncamento de legenda | Design | Pending |
-| ENRICH-16 | Edge case: LLM altera link | Design | Pending |
+| ENRICH-01 | P1: Geração de copy via LLM | Execute | ✅ Verified |
+| ENRICH-02 | P1: Geração de copy via LLM | Execute | ✅ Verified |
+| ENRICH-03 | P1: Geração de copy via LLM | Execute | ✅ Verified |
+| ENRICH-04 | P1: Geração de copy via LLM | Execute | ✅ Verified |
+| ENRICH-05 | P1: Fallback de copy por template | Execute | ✅ Verified |
+| ENRICH-06 | P1: Fallback de copy por template | Execute | ✅ Verified |
+| ENRICH-07 | P1: Fallback de copy por template | Execute | ✅ Verified (sinal por produto; agregação por ciclo é responsabilidade de `canais-disparo`) |
+| ENRICH-08 | P1: Composição de banner local | Execute | ❌ Needs Fix (gap de cobertura de teste — ver `validation.md` Fix 1) |
+| ENRICH-09 | P1: Composição de banner local | Execute | ✅ Verified |
+| ENRICH-10 | P1: Composição de banner local | Execute | ✅ Verified |
+| ENRICH-11 | P1: Composição de banner local | Execute | ✅ Verified |
+| ENRICH-12 | P1: Envio em modo texto puro | Execute | ✅ Verified |
+| ENRICH-13 | P1: Envio em modo texto puro | Execute | ✅ Verified |
+| ENRICH-14 | P3: Selo menor preço em N dias | Execute | ✅ Verified |
+| ENRICH-15 | Edge case: truncamento de legenda | Execute | ✅ Verified |
+| ENRICH-16 | Edge case: LLM altera link | Execute | ✅ Verified |
 
 **ID format:** `ENRICH-NN`
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 16 total, 0 mapped to tasks, 16 unmapped ⚠️ (Design/Tasks ainda não iniciados)
+**Coverage:** 16 total, 15 Verified, 1 Needs Fix (ENRICH-08) — ver `.specs/features/enriquecimento-conteudo/validation.md`
 
 ---
 

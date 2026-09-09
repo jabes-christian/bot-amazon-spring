@@ -110,9 +110,23 @@ class BannerImageServiceIT {
 			assertThat(banner.getWidth()).isEqualTo(800);
 			assertThat(banner.getHeight()).isEqualTo(800);
 			assertThat(resultado.get().toString()).endsWith(".jpg");
+
+			// Fundo puro (fora de qualquer overlay) preserva a cor original da foto do produto.
+			int gFundo = componenteVerde(banner.getRGB(400, 400));
+			assertThat(gFundo).isGreaterThan(200);
+
+			// Regiao da barra escura do overlay de desconto/de-por (y=680..800), longe do texto
+			// desenhado (que comeca em x=20): deve estar visivelmente mais escura que o fundo puro,
+			// provando que algo foi de fato desenhado ali (mesma tecnica usada no teste do selo).
+			int gOverlay = componenteVerde(banner.getRGB(750, 685));
+			assertThat(gOverlay).isLessThan(gFundo - 80);
 		} finally {
 			bannerImageService.removerBanner(resultado.get());
 		}
+	}
+
+	private static int componenteVerde(int rgb) {
+		return (rgb >> 8) & 0xFF;
 	}
 
 	@Test
