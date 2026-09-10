@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/enriquecimento-conteudo/design.md`
-**Status**: Fase 5 (T7, fix pós-Verifier) em andamento — Verifier iteração 1 (FAIL, `validation.md`) achou 1 gap de cobertura (ENRICH-08); T7 corrige e re-solicita verificação
+**Status**: Fase 5 (T8, fix pós-Verifier) em andamento — Verifier iteração 2 (FAIL, `validation.md`) provou por mutação que o fix de T7 para ENRICH-08 era insuficiente (amostra de pixel único caía na barra de fundo, não no texto); T8 corrige com contagem de pixels quase-brancos na região do overlay, validada contra a mesma mutação
 
 ---
 
@@ -282,6 +282,33 @@ T6 (depende de T4 e T5, cross-phase)
 **Gate**: full
 
 **Commit**: `test(enriquecimento-conteudo): fecha gap de cobertura ENRICH-08 e precisão de log ENRICH-04`
+
+---
+
+### T8: Corrige de fato o gap ENRICH-08 (fix de T7 provado insuficiente)
+
+**What**: Verifier iteração 2 (2026-09-09, `validation.md`) retornou FAIL: provou por mutação (removendo os 2 `drawString` de desconto/de-por, mantendo o resto do código intacto) que a asserção de T7 (comparar um único pixel em `(750, 685)` contra o fundo puro) continuava passando — o ponto amostrado caía dentro da barra escura semi-transparente (`fillRect` desenhado incondicionalmente), não em cima do texto, então a asserção só provava que a barra existe, nunca que o texto foi de fato renderizado. T8 substitui a comparação pontual por uma varredura de toda a região do overlay (`x:0..800, y:680..800`) contando pixels "quase brancos" (`R>200 && G>200 && B>200`): a barra de fundo (preto 160/255 de alpha sobre a foto do produto) nunca produz branco — só o texto branco desenhado via `drawString` o faz — tornando a asserção robusta à posição exata dos glifos. Validado localmente contra a mutação real (comentar os 2 `drawString` em cópia local do serviço, confirmar que a contagem cai a 0 e o teste falha, restaurar o arquivo) antes de considerar o fix pronto, conforme prescrito pela lição L-002.
+**Where**: `src/test/java/com/jchristian/bot_amazon_spring/service/BannerImageServiceIT.java` (modifica)
+**Depends on**: T7 (substitui a asserção que T7 introduziu)
+**Reuses**: Nenhum código novo em `main` — só a asserção de teste é substituída
+**Requirement**: ENRICH-08
+
+**Tools**:
+
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+
+- [x] `downloadComSucessoEImagemValidaGeraBannerJpeg800x800` varre toda a região do overlay (y=680..800, largura total) contando pixels quase-brancos e assere que a contagem excede um limiar (>500) — só atingível se o texto branco foi de fato desenhado
+- [x] Validado por mutação real: remover os 2 `drawString(desconto/de-por)` faz a contagem cair a 0 e o teste falhar (confirmado localmente antes do commit, depois revertido)
+- [x] Gate check passa: `mvn clean verify`
+- [x] Test count: 0 testes novos (1 teste existente de `BannerImageServiceIT` tem a asserção substituída), 5/5 passam, 0 falhas
+
+**Tests**: integration (extensão de teste já existente)
+**Gate**: build
+
+**Commit**: `test(enriquecimento-conteudo): substitui amostra de pixel unico por contagem de regiao para ENRICH-08`
 
 ---
 

@@ -42,6 +42,7 @@ class BannerImageServiceIT {
 
 	private static final String CHAVE_SELO_DIAS = "enriquecimento.selo-menor-preco-dias";
 	private static final String URL_IMAGEM = "https://images.amazon.com.br/B0BANNER1.jpg";
+	private static final int TAMANHO_CANVAS = 800;
 
 	@Autowired
 	private BannerImageService bannerImageService;
@@ -115,11 +116,15 @@ class BannerImageServiceIT {
 			int gFundo = componenteVerde(banner.getRGB(400, 400));
 			assertThat(gFundo).isGreaterThan(200);
 
-			// Regiao da barra escura do overlay de desconto/de-por (y=680..800), longe do texto
-			// desenhado (que comeca em x=20): deve estar visivelmente mais escura que o fundo puro,
-			// provando que algo foi de fato desenhado ali (mesma tecnica usada no teste do selo).
-			int gOverlay = componenteVerde(banner.getRGB(750, 685));
-			assertThat(gOverlay).isLessThan(gFundo - 80);
+			// Toda a regiao da barra do overlay (y=680..800) e varrida contando pixels quase
+			// brancos. A barra em si e um preto semi-transparente (alpha 160/255) sobre o verde
+			// puro do teste, o que blenda para um verde escurecido (~0,95,0) - nunca branco.
+			// Só o texto branco desenhado via drawString (desconto e de/por) produz pixels quase
+			// brancos ali. Validado por mutacao real: remover os dois drawString zera esta
+			// contagem, enquanto amostrar um unico ponto da barra (tecnica anterior) nao detecta
+			// a ausencia do texto.
+			int pixelsQuaseBrancos = contarPixelsQuaseBrancos(banner, 0, TAMANHO_CANVAS - 120, TAMANHO_CANVAS, 120);
+			assertThat(pixelsQuaseBrancos).isGreaterThan(500);
 		} finally {
 			bannerImageService.removerBanner(resultado.get());
 		}
@@ -127,6 +132,22 @@ class BannerImageServiceIT {
 
 	private static int componenteVerde(int rgb) {
 		return (rgb >> 8) & 0xFF;
+	}
+
+	private static int contarPixelsQuaseBrancos(BufferedImage imagem, int x, int y, int largura, int altura) {
+		int contagem = 0;
+		for (int px = x; px < x + largura; px++) {
+			for (int py = y; py < y + altura; py++) {
+				int rgb = imagem.getRGB(px, py);
+				int r = (rgb >> 16) & 0xFF;
+				int g = (rgb >> 8) & 0xFF;
+				int b = rgb & 0xFF;
+				if (r > 200 && g > 200 && b > 200) {
+					contagem++;
+				}
+			}
+		}
+		return contagem;
 	}
 
 	@Test
