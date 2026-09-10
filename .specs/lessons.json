@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 3,
+  "next_id": 4,
   "lessons": [
     {
       "id": "L-001",
@@ -40,6 +40,24 @@
       ],
       "created": "2026-09-09T00:35:09Z",
       "last_seen": "2026-09-09T00:35:09Z"
+    },
+    {
+      "id": "L-003",
+      "key": "spec_precision_gap::when an acceptance criterion s parenthetical names a specific visual style detail e g a literal strikethrough treat it as a testable precise outcome and record any decision to implement it as plain text instead rather than letting it narrow silently through design tasks",
+      "text": "When an acceptance criterion's parenthetical names a specific visual-style detail (e.g. a literal strikethrough), treat it as a testable precise outcome and record any decision to implement it as plain text instead, rather than letting it narrow silently through Design/Tasks.",
+      "signal": "spec_precision_gap",
+      "scope": "spec-precision",
+      "status": "candidate",
+      "features": [
+        "enriquecimento-conteudo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "ENRICH-08 (spec-precision)"
+      ],
+      "created": "2026-09-10T01:45:12Z",
+      "last_seen": "2026-09-10T01:45:12Z"
     }
   ]
 }

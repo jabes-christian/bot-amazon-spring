@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/enriquecimento-conteudo/design.md`
-**Status**: Fase 5 (T8, fix pós-Verifier) em andamento — Verifier iteração 2 (FAIL, `validation.md`) provou por mutação que o fix de T7 para ENRICH-08 era insuficiente (amostra de pixel único caía na barra de fundo, não no texto); T8 corrige com contagem de pixels quase-brancos na região do overlay, validada contra a mesma mutação
+**Status**: **Done** — 8/8 tasks completas. Verifier PASS na iteração 3 (`validation.md`): 16/16 ACs, gate 65/65, sensor 2/2 mortos (incluindo re-derivação independente da mutação de T8). 1 nota cosmética não-bloqueante registrada (ENRICH-08 "(riscado)" — texto plano, sem tachado) para avaliação do usuário.
 
 ---
 

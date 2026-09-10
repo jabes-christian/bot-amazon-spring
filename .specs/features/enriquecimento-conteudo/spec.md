@@ -133,7 +133,7 @@ Um produto candidato (ASIN, título, preço, imagem) não é um post pronto para
 | ENRICH-05 | P1: Fallback de copy por template | Execute | ✅ Verified |
 | ENRICH-06 | P1: Fallback de copy por template | Execute | ✅ Verified |
 | ENRICH-07 | P1: Fallback de copy por template | Execute | ✅ Verified (sinal por produto; agregação por ciclo é responsabilidade de `canais-disparo`) |
-| ENRICH-08 | P1: Composição de banner local | Execute | ❌ Needs Fix (gap de cobertura de teste — ver `validation.md` Fix 1) |
+| ENRICH-08 | P1: Composição de banner local | Execute | ✅ Verified (gap de cobertura fechado em T8, confirmado por sensor de discriminação na iteração 3 — ver `validation.md`) |
 | ENRICH-09 | P1: Composição de banner local | Execute | ✅ Verified |
 | ENRICH-10 | P1: Composição de banner local | Execute | ✅ Verified |
 | ENRICH-11 | P1: Composição de banner local | Execute | ✅ Verified |
@@ -147,7 +147,7 @@ Um produto candidato (ASIN, título, preço, imagem) não é um post pronto para
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 16 total, 15 Verified, 1 Needs Fix (ENRICH-08) — ver `.specs/features/enriquecimento-conteudo/validation.md`
+**Coverage:** 16 total, 16 Verified — ver `.specs/features/enriquecimento-conteudo/validation.md`
 
 ---
 
