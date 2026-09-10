@@ -20,6 +20,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: ENRICH-08 / src/test/java/com/jchristian/bot_amazon_spring/service/BannerImageServiceIT.java:99-116 (image-composition)
 - last seen: 2026-09-09T00:14:02Z
 
+### L-002 - When pixel-sampling a drawn overlay to prove content was rendered, sample a point inside the specific content (e.g. text glyphs), not a point that is also darkened by an unconditionally-drawn background fill, and confirm by mutating away the content-drawing call that the assertion actually fails.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `image-composition` · harmful: 0
+- features: enriquecimento-conteudo
+- evidence: Sensor#1 / src/test/java/com/jchristian/bot_amazon_spring/service/BannerImageServiceIT.java:114-122 (image-composition)
+- last seen: 2026-09-09T00:35:09Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

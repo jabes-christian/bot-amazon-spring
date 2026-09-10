@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 2,
+  "next_id": 3,
   "lessons": [
     {
       "id": "L-001",
@@ -22,6 +22,24 @@
       ],
       "created": "2026-09-09T00:14:02Z",
       "last_seen": "2026-09-09T00:14:02Z"
+    },
+    {
+      "id": "L-002",
+      "key": "surviving_mutant::when pixel sampling a drawn overlay to prove content was rendered sample a point inside the specific content e g text glyphs not a point that is also darkened by an unconditionally drawn background fill and confirm by mutating away the content drawing call that the assertion actually fails",
+      "text": "When pixel-sampling a drawn overlay to prove content was rendered, sample a point inside the specific content (e.g. text glyphs), not a point that is also darkened by an unconditionally-drawn background fill, and confirm by mutating away the content-drawing call that the assertion actually fails.",
+      "signal": "surviving_mutant",
+      "scope": "image-composition",
+      "status": "candidate",
+      "features": [
+        "enriquecimento-conteudo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "Sensor#1 / src/test/java/com/jchristian/bot_amazon_spring/service/BannerImageServiceIT.java:114-122 (image-composition)"
+      ],
+      "created": "2026-09-09T00:35:09Z",
+      "last_seen": "2026-09-09T00:35:09Z"
     }
   ]
 }
