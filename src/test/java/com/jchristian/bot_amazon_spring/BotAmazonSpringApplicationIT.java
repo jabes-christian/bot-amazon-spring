@@ -26,15 +26,16 @@ class BotAmazonSpringApplicationIT {
 	void contextLoadsAndMigrationApplies() {
 		Integer tableCount = jdbcTemplate.queryForObject(
 				"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' "
-						+ "AND table_name IN ('categoria_coleta', 'product', 'price_history', 'app_config')",
+						+ "AND table_name IN ('categoria_coleta', 'product', 'price_history', 'app_config', "
+						+ "'channel', 'dispatch_history')",
 				Integer.class);
-		assertThat(tableCount).isEqualTo(4);
+		assertThat(tableCount).isEqualTo(6);
 
 		Integer categoriasSeed = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categoria_coleta", Integer.class);
 		assertThat(categoriasSeed).isEqualTo(5);
 
 		Integer appConfigSeed = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM app_config", Integer.class);
-		assertThat(appConfigSeed).isEqualTo(7);
+		assertThat(appConfigSeed).isEqualTo(10);
 
 		String percentualMinimoQueda = jdbcTemplate.queryForObject(
 				"SELECT valor FROM app_config WHERE chave = 'coleta.percentual-minimo-queda'", String.class);
