@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/canais-disparo/design.md`
-**Status**: Draft — aguardando aprovação do usuário antes de Execute
+**Status**: Done — 9/9 tasks completas, gate `mvn clean verify` verde em todas. Aguardando Verifier.
 
 ---
 

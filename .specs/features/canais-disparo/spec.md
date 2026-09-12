@@ -166,38 +166,38 @@ Ter produtos enriquecidos não adianta se não houver para onde mandá-los, quan
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| DISPATCH-01 | P1: Canal configurável via banco | Design | Pending |
-| DISPATCH-02 | P1: Canal configurável via banco | Design | Pending |
-| DISPATCH-03 | P1: Canal configurável via banco | Design | Pending |
-| DISPATCH-04 | P1: Canal configurável via banco | Design | Pending |
-| DISPATCH-05 | P1: Agendamento de coleta e disparo | Design | Pending |
-| DISPATCH-06 | P1: Agendamento de coleta e disparo | Design | Pending |
-| DISPATCH-07 | P1: Agendamento de coleta e disparo | Design | Pending |
-| DISPATCH-08 | P1: Agendamento de coleta e disparo | Design | Pending |
-| DISPATCH-09 | P1: Seleção e priorização de candidatos | Design | Pending |
-| DISPATCH-10 | P1: Seleção e priorização de candidatos | Design | Pending |
-| DISPATCH-11 | P1: Seleção e priorização de candidatos | Design | Pending |
-| DISPATCH-12 | P1: Seleção e priorização de candidatos | Design | Pending |
-| DISPATCH-13 | P1: Envio via Telegram | Design | Pending |
-| DISPATCH-14 | P1: Envio via Telegram | Design | Pending |
-| DISPATCH-15 | P1: Envio via Telegram | Design | Pending |
-| DISPATCH-16 | P2: Envio via WhatsApp | Design | Pending |
-| DISPATCH-17 | P2: Envio via WhatsApp | Design | Pending |
-| DISPATCH-18 | P2: Envio via WhatsApp | Design | Pending |
-| DISPATCH-19 | P1: Deduplicação por produto×canal×janela | Design | Pending |
-| DISPATCH-20 | P1: Deduplicação por produto×canal×janela | Design | Pending |
-| DISPATCH-21 | P1: Deduplicação por produto×canal×janela | Design | Pending |
-| DISPATCH-22 | P1: Isolamento de falha e retry | Design | Pending |
-| DISPATCH-23 | P1: Isolamento de falha e retry | Design | Pending |
-| DISPATCH-24 | P1: Isolamento de falha e retry | Design | Pending |
-| DISPATCH-25 | Edge case: nenhum canal ativo | Design | Pending |
-| DISPATCH-26 | Edge case: categorias aceitas vazias | Design | Pending |
+| DISPATCH-01 | P1: Canal configurável via banco | Execute | ✅ Verified |
+| DISPATCH-02 | P1: Canal configurável via banco | Execute | ✅ Verified |
+| DISPATCH-03 | P1: Canal configurável via banco | Execute | ✅ Verified |
+| DISPATCH-04 | P1: Canal configurável via banco | Execute | ✅ Verified |
+| DISPATCH-05 | P1: Agendamento de coleta e disparo | Execute | ✅ Verified (evidência estrutural — sem teste de disparo em tempo real do cron, ver `validation.md`) |
+| DISPATCH-06 | P1: Agendamento de coleta e disparo | Execute | ✅ Verified (evidência estrutural — mesmo caso de DISPATCH-05) |
+| DISPATCH-07 | P1: Agendamento de coleta e disparo | Execute | ✅ Verified (evidência estrutural — mesmo caso de DISPATCH-05) |
+| DISPATCH-08 | P1: Agendamento de coleta e disparo | Execute | ✅ Verified |
+| DISPATCH-09 | P1: Seleção e priorização de candidatos | Execute | ✅ Verified |
+| DISPATCH-10 | P1: Seleção e priorização de candidatos | Execute | ✅ Verified |
+| DISPATCH-11 | P1: Seleção e priorização de candidatos | Execute | ✅ Verified |
+| DISPATCH-12 | P1: Seleção e priorização de candidatos | Execute | ✅ Verified |
+| DISPATCH-13 | P1: Envio via Telegram | Execute | ✅ Verified |
+| DISPATCH-14 | P1: Envio via Telegram | Execute | ✅ Verified |
+| DISPATCH-15 | P1: Envio via Telegram | Execute | ✅ Verified (config lida com o default correto a cada envio; invocação real do `Thread.sleep` não observada diretamente — ver L-004 em `LESSONS.md` e `validation.md`) |
+| DISPATCH-16 | P2: Envio via WhatsApp | Execute | ✅ Verified |
+| DISPATCH-17 | P2: Envio via WhatsApp | Execute | ✅ Verified |
+| DISPATCH-18 | P2: Envio via WhatsApp | Execute | ✅ Verified (mesmo caso de DISPATCH-15 — lógica de intervalo compartilhada) |
+| DISPATCH-19 | P1: Deduplicação por produto×canal×janela | Execute | ✅ Verified |
+| DISPATCH-20 | P1: Deduplicação por produto×canal×janela | Execute | ✅ Verified |
+| DISPATCH-21 | P1: Deduplicação por produto×canal×janela | Execute | ✅ Verified |
+| DISPATCH-22 | P1: Isolamento de falha e retry | Execute | ✅ Verified |
+| DISPATCH-23 | P1: Isolamento de falha e retry | Execute | ✅ Verified |
+| DISPATCH-24 | P1: Isolamento de falha e retry | Execute | ✅ Verified |
+| DISPATCH-25 | Edge case: nenhum canal ativo | Execute | ✅ Verified |
+| DISPATCH-26 | Edge case: categorias aceitas vazias | Execute | ✅ Verified |
 
 **ID format:** `DISPATCH-NN`
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 26 total, 0 mapped to tasks, 26 unmapped ⚠️ (Design/Tasks ainda não iniciados)
+**Coverage:** 26 total, 26 Verified — ver `.specs/features/canais-disparo/validation.md` (Verifier PASS, gate 93/93, sensor 7/7 mortos)
 
 ---
 

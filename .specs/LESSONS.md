@@ -32,6 +32,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: ENRICH-08 (spec-precision)
 - last seen: 2026-09-10T01:45:12Z
 
+### L-004 - When a criterion requires waiting a configured duration between actions, verifying that the config value is read with the right default does not prove the wait actually happens - assert the sleep/wait invocation itself or explicitly document the gap.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `timing` · harmful: 0
+- features: canais-disparo
+- evidence: DISPATCH-15 / src/test/java/com/jchristian/bot_amazon_spring/service/DisparoServiceTest.java:219-235 (timing)
+- last seen: 2026-09-12T03:31:12Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

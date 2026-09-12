@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 4,
+  "next_id": 5,
   "lessons": [
     {
       "id": "L-001",
@@ -58,6 +58,24 @@
       ],
       "created": "2026-09-10T01:45:12Z",
       "last_seen": "2026-09-10T01:45:12Z"
+    },
+    {
+      "id": "L-004",
+      "key": "spec_precision_gap::when a criterion requires waiting a configured duration between actions verifying that the config value is read with the right default does not prove the wait actually happens assert the sleep wait invocation itself or explicitly document the gap",
+      "text": "When a criterion requires waiting a configured duration between actions, verifying that the config value is read with the right default does not prove the wait actually happens - assert the sleep/wait invocation itself or explicitly document the gap.",
+      "signal": "spec_precision_gap",
+      "scope": "timing",
+      "status": "candidate",
+      "features": [
+        "canais-disparo"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "DISPATCH-15 / src/test/java/com/jchristian/bot_amazon_spring/service/DisparoServiceTest.java:219-235 (timing)"
+      ],
+      "created": "2026-09-12T03:31:12Z",
+      "last_seen": "2026-09-12T03:31:12Z"
     }
   ]
 }
