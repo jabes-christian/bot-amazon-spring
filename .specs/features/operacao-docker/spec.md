@@ -127,21 +127,21 @@ O bot precisa rodar de forma reproduzível em desenvolvimento (IDE + hot-reload)
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| OPS-01 | P1: Ambiente de desenvolvimento | Design | Pending |
-| OPS-02 | P1: Ambiente de desenvolvimento | Design | Pending |
-| OPS-03 | P1: Ambiente de desenvolvimento | Design | Pending |
-| OPS-04 | P1: Ambiente de produção | Design | Pending |
-| OPS-05 | P1: Ambiente de produção | Design | Pending |
-| OPS-06 | P1: Ambiente de produção | Design | Pending |
-| OPS-07 | P1: Ambiente de produção | Design | Pending |
-| OPS-08 | P1: Ambiente de produção | Design | Pending |
+| OPS-01 | P1: Ambiente de desenvolvimento | Execute | Implementing |
+| OPS-02 | P1: Ambiente de desenvolvimento | Execute | Implementing |
+| OPS-03 | P1: Ambiente de desenvolvimento | Execute | Implementing |
+| OPS-04 | P1: Ambiente de produção | Execute | Implementing |
+| OPS-05 | P1: Ambiente de produção | Execute | Implementing |
+| OPS-06 | P1: Ambiente de produção | Execute | Implementing |
+| OPS-07 | P1: Ambiente de produção | Execute | Implementing |
+| OPS-08 | P1: Ambiente de produção | Execute | Implementing |
 | OPS-09 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
 | OPS-10 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
 | OPS-11 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
 | OPS-12 | P1: Log estruturado por etapa | Execute | Implementing |
 | OPS-13 | P1: Log estruturado por etapa | Execute | Implementing |
-| OPS-14 | Edge case: healthcheck Postgres | Design | Pending |
-| OPS-15 | Edge case: healthcheck Selenium | Design | Pending |
+| OPS-14 | Edge case: healthcheck Postgres | Execute | Implementing |
+| OPS-15 | Edge case: healthcheck Selenium | Execute | Implementing |
 | OPS-16 | P1: Gestão de schema via Flyway | Execute | Implementing |
 | OPS-17 | P1: Gestão de schema via Flyway | Execute | Implementing |
 | OPS-18 | P1: Gestão de schema via Flyway | Execute | Implementing |
@@ -151,7 +151,7 @@ O bot precisa rodar de forma reproduzível em desenvolvimento (IDE + hot-reload)
 
 **Status values:** Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage:** 19 total, 0 mapped to tasks, 19 unmapped ⚠️ (Design/Tasks ainda não iniciados)
+**Coverage:** 19 total, 19 mapped a tasks (T1/T2 → OPS-09..11; T5 → OPS-01..03; T6 → OPS-04..08, OPS-14, OPS-15; T7 → OPS-12; T8 → OPS-13; T9 → OPS-16..19), 0 unmapped
 
 ---
 
