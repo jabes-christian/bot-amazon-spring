@@ -4,10 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,6 +25,9 @@ class BotAmazonSpringApplicationIT {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private Environment environment;
 
 	@Test
 	void contextLoadsAndMigrationApplies() {
@@ -44,6 +51,17 @@ class BotAmazonSpringApplicationIT {
 		String llmTimeoutSegundos = jdbcTemplate.queryForObject(
 				"SELECT valor FROM app_config WHERE chave = 'enriquecimento.llm-timeout-segundos'", String.class);
 		assertThat(llmTimeoutSegundos).isEqualTo("15");
+	}
+
+	@Test
+	void flywaySchemaHistoryTemAsTresMigrationsAplicadasComSucessoEDdlAutoEhValidate() {
+		List<Map<String, Object>> historico = jdbcTemplate.queryForList(
+				"SELECT version, success FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank");
+
+		assertThat(historico).extracting(row -> row.get("version")).containsExactly("1", "2", "3");
+		assertThat(historico).allMatch(row -> Boolean.TRUE.equals(row.get("success")));
+
+		assertThat(environment.getProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("validate");
 	}
 
 }

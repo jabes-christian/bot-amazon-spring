@@ -142,10 +142,10 @@ O bot precisa rodar de forma reproduzível em desenvolvimento (IDE + hot-reload)
 | OPS-13 | P1: Log estruturado por etapa | Execute | Implementing |
 | OPS-14 | Edge case: healthcheck Postgres | Design | Pending |
 | OPS-15 | Edge case: healthcheck Selenium | Design | Pending |
-| OPS-16 | P1: Gestão de schema via Flyway | Design | Pending |
-| OPS-17 | P1: Gestão de schema via Flyway | Design | Pending |
-| OPS-18 | P1: Gestão de schema via Flyway | Design | Pending |
-| OPS-19 | P1: Gestão de schema via Flyway | Design | Pending |
+| OPS-16 | P1: Gestão de schema via Flyway | Execute | Implementing |
+| OPS-17 | P1: Gestão de schema via Flyway | Execute | Implementing |
+| OPS-18 | P1: Gestão de schema via Flyway | Execute | Implementing |
+| OPS-19 | P1: Gestão de schema via Flyway | Execute | Implementing |
 
 **ID format:** `OPS-NN`
 

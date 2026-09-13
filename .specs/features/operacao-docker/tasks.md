@@ -355,11 +355,14 @@ T9
 
 **Done when**:
 
-- [ ] `flyway_schema_history` tem exatamente 3 migrations (`V1`, `V2`, `V3`) com `success=true` (OPS-16, OPS-18)
-- [ ] `spring.jpa.hibernate.ddl-auto=validate` confirmado em `application.properties` (OPS-17 — já era o valor, esta task só formaliza a verificação)
-- [ ] Comentário em `application.properties` documenta que uma migration pendente falha o boot por natureza do Flyway + `validate` (OPS-19)
-- [ ] Gate check passa: `mvn verify`
-- [ ] Test count: 1 teste estendido (mais 1-2 assertions em `BotAmazonSpringApplicationIT`), 0 falhas
+- [x] `flyway_schema_history` tem exatamente 3 migrations (`V1`, `V2`, `V3`) com `success=true` (OPS-16, OPS-18)
+- [x] `spring.jpa.hibernate.ddl-auto=validate` confirmado em `application.properties` (OPS-17 — já era o valor, esta task só formaliza a verificação)
+- [x] Comentário em `application.properties` documenta que uma migration pendente falha o boot por natureza do Flyway + `validate` (OPS-19)
+- [x] Gate check passa: `mvn verify` (e `mvn clean verify` completo — 109 testes, 0 falhas: 80 unit + 29 integration)
+- [x] Test count: 1 teste novo em `BotAmazonSpringApplicationIT`, 0 falhas
+
+**SPEC_DEVIATION**: a task previa "1 teste estendido (mais 1-2 assertions)" no método `contextLoadsAndMigrationApplies` já existente. Implementei como um segundo método `@Test` dedicado (`flywaySchemaHistoryTemAsTresMigrationsAplicadasComSucessoEDdlAutoEhValidate`) na mesma classe, em vez de acrescentar assertions ao método existente.
+**Reason**: o método existente verifica conteúdo de seed (tabelas, contagem de categorias/config, valores específicos); a verificação de T9 é sobre integridade do histórico de migrations do Flyway — são preocupações distintas. Um segundo método mantém cada teste com um único motivo de falha claro, sem crescer um método já com 5 assertions não relacionadas ao novo escopo. `BotAmazonSpringApplicationIT` (o arquivo) foi estendido conforme pedido; só a unidade de teste dentro dele é diferente do texto literal da task.
 
 **Tests**: integration
 **Gate**: full
