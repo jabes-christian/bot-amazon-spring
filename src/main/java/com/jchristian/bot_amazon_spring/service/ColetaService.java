@@ -38,12 +38,14 @@ public class ColetaService {
 	public void executarCicloColeta() {
 		List<CategoriaColeta> categorias = categoriaColetaRepository.findByAtivoTrue();
 		int totalProdutosExtraidos = 0;
+		int falhasCategoria = 0;
 
 		for (int i = 0; i < categorias.size(); i++) {
 			CategoriaColeta categoria = categorias.get(i);
 			try {
 				totalProdutosExtraidos += processarCategoria(categoria);
 			} catch (Exception e) {
+				falhasCategoria++;
 				log.error("COLETA: falha ao processar categoria {}", categoria.getCodigo(), e);
 			}
 			if (i < categorias.size() - 1) {
@@ -54,6 +56,9 @@ public class ColetaService {
 		if (totalProdutosExtraidos == 0) {
 			log.warn("COLETA: ciclo inteiro extraiu zero produtos");
 		}
+
+		log.info("COLETA: ciclo concluido - categoriasProcessadas={}, produtosExtraidos={}, falhasCategoria={}",
+				categorias.size(), totalProdutosExtraidos, falhasCategoria);
 	}
 
 	private int processarCategoria(CategoriaColeta categoria) {

@@ -139,7 +139,7 @@ O bot precisa rodar de forma reproduzível em desenvolvimento (IDE + hot-reload)
 | OPS-10 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
 | OPS-11 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
 | OPS-12 | P1: Log estruturado por etapa | Execute | Implementing |
-| OPS-13 | P1: Log estruturado por etapa | Design | Pending |
+| OPS-13 | P1: Log estruturado por etapa | Execute | Implementing |
 | OPS-14 | Edge case: healthcheck Postgres | Design | Pending |
 | OPS-15 | Edge case: healthcheck Selenium | Design | Pending |
 | OPS-16 | P1: Gestão de schema via Flyway | Design | Pending |

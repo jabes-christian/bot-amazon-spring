@@ -435,4 +435,27 @@ class DisparoServiceTest {
 				&& evento.getFormattedMessage().contains("copiasViaTemplate=1"));
 	}
 
+	@Test
+	void logaContagemDeEnviosSucessoEFalhaAoFinalDoCiclo() {
+		CategoriaColeta categoria = categoria("MONITOR");
+		Product produto = produto("B0X", categoria);
+		CandidatoPromocaoDTO candidato = candidato(produto, "20.00");
+		Channel canalOk = canal(1L, TipoCanal.TELEGRAM, "MONITOR");
+		Channel canalComFalha = canal(2L, TipoCanal.WHATSAPP, "MONITOR");
+
+		when(promotionDetectionService.buscarCandidatosElegiveis()).thenReturn(List.of(candidato));
+		when(channelRepository.findByAtivoTrue()).thenReturn(List.of(canalOk, canalComFalha));
+		stubConfigsPadrao();
+		stubSemDedup();
+		when(enriquecimentoService.enriquecer(candidato)).thenReturn(conteudo(true));
+		doThrow(new EnvioException("falha")).when(whatsAppChannelSender).enviar(eq(canalComFalha), any());
+
+		novoService().executarCicloDisparo();
+
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.INFO
+				&& evento.getFormattedMessage().startsWith("DISPARO: ciclo concluido")
+				&& evento.getFormattedMessage().contains("enviosSucesso=1")
+				&& evento.getFormattedMessage().contains("enviosFalha=1"));
+	}
+
 }

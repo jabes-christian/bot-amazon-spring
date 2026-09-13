@@ -324,12 +324,12 @@ T9
 
 **Done when**:
 
-- [ ] Ao final de um ciclo de coleta, log INFO com categorias processadas, produtos extraídos e falhas de categoria (OPS-13)
-- [ ] Ao final de um ciclo de disparo, log INFO estendido com envios bem-sucedidos e com falha, mantendo `copiasViaLlm`/`copiasViaTemplate` (OPS-13)
-- [ ] `DisparoServiceTest.java:367` (contagem exata de 2 eventos WARN por ciclo) continua passando sem modificação — nenhum novo WARN introduzido
-- [ ] `DisparoServiceTest.java:433-435` (asserts de `copiasViaLlm=1`/`copiasViaTemplate=1`) continua passando — tokens preservados, resumo só estendido
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 2 testes novos ou estendidos (1 por classe), 0 falhas
+- [x] Ao final de um ciclo de coleta, log INFO com categorias processadas, produtos extraídos e falhas de categoria (OPS-13)
+- [x] Ao final de um ciclo de disparo, log INFO estendido com envios bem-sucedidos e com falha, mantendo `copiasViaLlm`/`copiasViaTemplate` (OPS-13)
+- [x] `DisparoServiceTest.java:367` (contagem exata de 2 eventos WARN por ciclo) continua passando sem modificação — nenhum novo WARN introduzido (confirmado rodando o teste isoladamente: log mostra só os 2 WARN de canal com categorias vazias, resumo novo sai em INFO)
+- [x] `DisparoServiceTest.java:433-435` (asserts de `copiasViaLlm=1`/`copiasViaTemplate=1`) continua passando — tokens preservados, resumo só estendido
+- [x] Gate check passa: `mvn test` (e `mvn clean verify` completo — 108 testes, 0 falhas: 80 unit + 28 integration)
+- [x] Test count: 2 testes novos (1 por classe: `ColetaServiceTest`, `DisparoServiceTest`), 0 falhas
 
 **Tests**: unit
 **Gate**: quick

@@ -215,6 +215,36 @@ class ColetaServiceTest {
 	}
 
 	@Test
+	void logaResumoDoCicloComCategoriasProcessadasProdutosExtraidosEFalhasCategoria() {
+		when(categoriaColetaRepository.findByAtivoTrue())
+				.thenReturn(List.of(categoria("MONITOR", "monitor"), categoria("NOTEBOOK", "notebook")));
+		when(amazonProductScraper.buscarPorKeyword("monitor"))
+				.thenReturn(List.of(scraped("B0A", "Produto A", "100.00"), scraped("B0B", "Produto B", "200.00")));
+		when(amazonProductScraper.buscarPorKeyword("notebook")).thenThrow(new RuntimeException("falha simulada"));
+		when(configService.getLong(eq(CHAVE_INTERVALO_CATEGORIAS), anyLong())).thenReturn(0L);
+		when(productRepository.findByAsin(any())).thenReturn(Optional.empty());
+		when(productRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+		stubLimiaresDePreco();
+
+		Logger logger = (Logger) LoggerFactory.getLogger(ColetaService.class);
+		ListAppender<ILoggingEvent> appender = new ListAppender<>();
+		appender.start();
+		logger.addAppender(appender);
+
+		try {
+			assertDoesNotThrow(() -> novoService().executarCicloColeta());
+
+			assertThat(appender.list).anyMatch(evento -> evento.getLevel() == Level.INFO
+					&& evento.getFormattedMessage().startsWith("COLETA: ciclo concluido")
+					&& evento.getFormattedMessage().contains("categoriasProcessadas=2")
+					&& evento.getFormattedMessage().contains("produtosExtraidos=2")
+					&& evento.getFormattedMessage().contains("falhasCategoria=1"));
+		} finally {
+			logger.detachAppender(appender);
+		}
+	}
+
+	@Test
 	void cicloComZeroProdutosExtraidosLogaWarnENaoLancaExcecao() {
 		when(categoriaColetaRepository.findByAtivoTrue()).thenReturn(List.of(categoria("MONITOR", "monitor")));
 		when(amazonProductScraper.buscarPorKeyword("monitor")).thenReturn(List.of());

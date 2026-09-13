@@ -63,6 +63,8 @@ public class DisparoService {
 
 		int copiasViaLlm = 0;
 		int copiasViaTemplate = 0;
+		int enviosSucesso = 0;
+		int enviosFalha = 0;
 
 		for (Map.Entry<Product, Set<Channel>> entry : selecaoPorProduto.entrySet()) {
 			Product produto = entry.getKey();
@@ -77,7 +79,11 @@ public class DisparoService {
 			}
 
 			for (Channel canal : canaisDoProduto) {
-				enviarComRetry(canal, produto, conteudo);
+				if (enviarComRetry(canal, produto, conteudo)) {
+					enviosSucesso++;
+				} else {
+					enviosFalha++;
+				}
 			}
 
 			if (conteudo.bannerPath() != null) {
@@ -85,7 +91,8 @@ public class DisparoService {
 			}
 		}
 
-		log.info("DISPARO: ciclo concluido - copiasViaLlm={}, copiasViaTemplate={}", copiasViaLlm, copiasViaTemplate);
+		log.info("DISPARO: ciclo concluido - copiasViaLlm={}, copiasViaTemplate={}, enviosSucesso={}, enviosFalha={}",
+				copiasViaLlm, copiasViaTemplate, enviosSucesso, enviosFalha);
 	}
 
 	private Map<Product, Set<Channel>> selecionarCandidatosPorCanal(List<Channel> canaisAtivos,
@@ -124,19 +131,22 @@ public class DisparoService {
 		return selecaoPorProduto;
 	}
 
-	private void enviarComRetry(Channel canal, Product produto, ConteudoEnriquecidoDTO conteudo) {
+	private boolean enviarComRetry(Channel canal, Product produto, ConteudoEnriquecidoDTO conteudo) {
 		ChannelSender sender = canal.getTipo() == TipoCanal.TELEGRAM ? telegramChannelSender : whatsAppChannelSender;
 
 		try {
 			sender.enviar(canal, conteudo);
 			registrarSucesso(produto, canal);
+			return true;
 		} catch (EnvioException primeiraFalha) {
 			try {
 				sender.enviar(canal, conteudo);
 				registrarSucesso(produto, canal);
+				return true;
 			} catch (EnvioException segundaFalha) {
 				log.error("DISPARO: falha ao enviar apos retry - canal={}, produto={}, motivo={}", canal.getId(),
 						produto.getAsin(), segundaFalha.getMessage());
+				return false;
 			}
 		} finally {
 			aguardarIntervaloEntreEnvios();
