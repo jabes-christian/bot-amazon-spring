@@ -201,10 +201,10 @@ T9
 
 **Done when**:
 
-- [ ] `docker build -t bot-amazon-spring .` conclui com sucesso
-- [ ] Container iniciado sem nenhuma env var obrigatória falha citando as variáveis ausentes (prova que T2 funciona no ambiente real de container, não só no teste unitário)
-- [ ] Stage runtime tem `fontconfig`/`ttf-dejavu` instalados
-- [ ] Gate check passa: `mvn clean verify` (o Dockerfile em si não tem teste JVM — validado por inspeção/build manual)
+- [x] `docker build -t bot-amazon-spring .` conclui com sucesso (build real rodado nesta sessão, `BUILD SUCCESS` do Maven dentro do stage de build + imagem exportada)
+- [x] Container iniciado sem nenhuma env var obrigatória falha citando as variáveis ausentes (`docker run --rm bot-amazon-spring`, exit code 1, `IllegalStateException` citando as 10 propriedades — prova real, não só o teste unitário/`mvn spring-boot:run` local de T2)
+- [x] Stage runtime tem `fontconfig`/`ttf-dejavu` instalados (`apk info -e fontconfig ttf-dejavu` confirmou ambos + `fc-list` listou as fontes DejaVu)
+- [x] Gate check passa: `mvn clean verify` (98 testes, 0 falhas — Dockerfile em si não tem teste JVM, validado por build/run manual acima)
 
 **Tests**: none
 **Gate**: build
