@@ -255,16 +255,18 @@ T9
 - MCP: `context7` (confirmar o endpoint/comando de healthcheck correto da imagem `selenium/standalone-chrome` antes de configurar)
 - Skill: NONE
 
+**Pesquisa (Context7, `/seleniumhq/docker-selenium`)**: healthcheck oficial é `/opt/bin/check-grid.sh --host 0.0.0.0 --port 4444`, script já embutido na imagem (usado por hub, node e standalone). Endpoint de sessão do `RemoteWebDriver` confirmado no exemplo Java oficial do próprio docker-selenium: `http://<host>:4444/wd/hub`. Imagem pinada em `selenium/standalone-chrome:4.37.0` (mesma versão do `selenium-java` já fixada no `pom.xml`, tag confirmada existente antes do uso).
+
 **Done when**:
 
-- [ ] `docker compose -f docker-compose.prod.yml up` sobe `postgres`, `selenium` e `app` (OPS-04)
-- [ ] Serviço `app` só inicia depois de `postgres` E `selenium` reportarem `healthy` (OPS-05)
-- [ ] Com `SELENIUM_REMOTE_URL` apontando para o serviço `selenium`, a aplicação usa `RemoteWebDriver` (OPS-06 — comportamento herdado)
-- [ ] Os três serviços têm `restart: unless-stopped` (OPS-07)
-- [ ] Dados do Postgres persistem em volume nomeado após `docker compose down` sem `-v` (OPS-08)
-- [ ] Se `postgres` não atingir o healthcheck a tempo, `app` não inicia (OPS-14, comportamento padrão do `depends_on: condition: service_healthy`)
-- [ ] Se `selenium` não atingir o healthcheck a tempo, `app` não inicia (OPS-15, mesmo mecanismo)
-- [ ] Gate check passa: `mvn clean verify`
+- [x] `docker compose -f docker-compose.prod.yml up` sobe `postgres`, `selenium` e `app` (OPS-04) — rodado de fato nesta sessão, `docker compose ps` mostrou os 3 containers `Up`
+- [x] Serviço `app` só inicia depois de `postgres` E `selenium` reportarem `healthy` (OPS-05) — comprovado pela sequência real do próprio `docker compose up`: `postgres Waiting` / `selenium Waiting` → `postgres Healthy` / `selenium Healthy` → só então `app Starting`/`Started`. Reproduzido 2x (subida inicial e após `down`/`up` do teste de persistência)
+- [x] Com `SELENIUM_REMOTE_URL` apontando para o serviço `selenium`, a aplicação usa `RemoteWebDriver` (OPS-06 — comportamento herdado) — variável confirmada injetada corretamente no container via `docker compose config` (`SELENIUM_REMOTE_URL: http://selenium:4444/wd/hub`); o branch `SeleniumConfig` (`!remoteUrl.isBlank()` → `RemoteWebDriver`) é código já existente e não alterado por esta task. **Ressalva honesta**: por causa do `@Lazy` (T3), o `WebDriver` só materializa no primeiro uso real de um método do scraper — este smoke test não disparou uma coleta de verdade, então não observei o `RemoteWebDriver` sendo instanciado ao vivo, só a variável correta chegando ao container e o branch de código inalterado
+- [x] Os três serviços têm `restart: unless-stopped` (OPS-07) — presente nos 3 no `docker-compose.prod.yml`
+- [x] Dados do Postgres persistem em volume nomeado após `docker compose down` sem `-v` (OPS-08) — teste real: criei uma tabela+linha marcadora, `docker compose down` (sem `-v`), confirmei o volume nomeado sobrevivendo (`docker volume ls`), `docker compose up` de novo, `SELECT` confirmou a linha marcadora intacta
+- [x] Se `postgres` não atingir o healthcheck a tempo, `app` não inicia (OPS-14, comportamento padrão do `depends_on: condition: service_healthy`) — não forçado neste smoke test (exigiria quebrar o healthcheck de propósito); é comportamento nativo do Compose para `condition: service_healthy`, já observado indiretamente pela ordem real confirmada acima
+- [x] Se `selenium` não atingir o healthcheck a tempo, `app` não inicia (OPS-15, mesmo mecanismo) — mesma observação de OPS-14
+- [x] Gate check passa: `mvn clean verify` (98 testes, 0 falhas)
 
 **Tests**: none
 **Gate**: build
