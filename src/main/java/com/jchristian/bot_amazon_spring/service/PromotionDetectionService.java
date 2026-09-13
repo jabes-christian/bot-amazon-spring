@@ -5,6 +5,7 @@ import com.jchristian.bot_amazon_spring.entity.Product;
 import com.jchristian.bot_amazon_spring.repository.PriceHistoryRepository;
 import com.jchristian.bot_amazon_spring.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PromotionDetectionService {
 
 	private static final String CHAVE_PERCENTUAL_MINIMO = "coleta.percentual-minimo-queda";
@@ -31,6 +33,7 @@ public class PromotionDetectionService {
 		for (Product product : productRepository.findAll()) {
 			BigDecimal precoBase = calcularPrecoBase(product);
 			if (precoBase == null) {
+				log.info("DETECCAO: produto sem base de preco para avaliacao, ignorado - asin={}", product.getAsin());
 				continue;
 			}
 
@@ -38,8 +41,12 @@ public class PromotionDetectionService {
 			boolean quedaRelevante = percentualDesconto.compareTo(percentualMinimo) >= 0;
 			boolean jaSinalizadoNessePreco = product.getLastCandidatoPreco() != null
 					&& product.getPrecoAtual().compareTo(product.getLastCandidatoPreco()) == 0;
+			boolean elegivel = quedaRelevante && !jaSinalizadoNessePreco;
 
-			if (quedaRelevante && !jaSinalizadoNessePreco) {
+			log.info("DETECCAO: produto avaliado - asin={}, percentualDesconto={}, elegivel={}", product.getAsin(),
+					percentualDesconto, elegivel);
+
+			if (elegivel) {
 				candidatos.add(new CandidatoPromocaoDTO(product, percentualDesconto, precoBase));
 				product.setLastCandidatoPreco(product.getPrecoAtual());
 				productRepository.save(product);

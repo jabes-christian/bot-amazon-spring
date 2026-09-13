@@ -1,7 +1,12 @@
 package com.jchristian.bot_amazon_spring.scraper;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.jchristian.bot_amazon_spring.config.AmazonSelectorsProperties;
 import com.jchristian.bot_amazon_spring.dto.ScrapedProductDTO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +18,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
@@ -50,10 +56,23 @@ class AmazonProductScraperTest {
 
 	private AmazonProductScraper scraper;
 
+	private ListAppender<ILoggingEvent> logAppender;
+
 	@BeforeEach
 	void setUp() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(300));
 		scraper = new AmazonProductScraper(driver, wait, selectors);
+
+		Logger logger = (Logger) LoggerFactory.getLogger(AmazonProductScraper.class);
+		logAppender = new ListAppender<>();
+		logAppender.start();
+		logger.addAppender(logAppender);
+	}
+
+	@AfterEach
+	void tearDown() {
+		Logger logger = (Logger) LoggerFactory.getLogger(AmazonProductScraper.class);
+		logger.detachAppender(logAppender);
 	}
 
 	@Test
@@ -130,6 +149,67 @@ class AmazonProductScraperTest {
 				.thenThrow(new WebDriverException("driver morto"));
 
 		assertThrows(WebDriverException.class, () -> scraper.buscarPorKeyword("monitor gamer"));
+	}
+
+	@Test
+	void buscarPorKeywordLogaAvisoPrefixadoColetaQuandoTimeoutAoAguardarCards() {
+		when(driver.findElements(By.cssSelector(selectors.getCardContainer()))).thenReturn(List.of());
+
+		scraper.buscarPorKeyword("produto sem resultado nenhum");
+
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.WARN
+				&& evento.getFormattedMessage().startsWith("COLETA:")
+				&& evento.getFormattedMessage().contains("produto sem resultado nenhum"));
+	}
+
+	@Test
+	void cardSemAsinLogaAvisoPrefixadoColeta() {
+		when(driver.findElements(By.cssSelector(selectors.getCardContainer()))).thenReturn(List.of(card));
+		when(card.getAttribute(selectors.getAsinAttributo())).thenReturn(null);
+
+		scraper.buscarPorKeyword("monitor gamer");
+
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.WARN
+				&& evento.getFormattedMessage().startsWith("COLETA:")
+				&& evento.getFormattedMessage().contains("sem ASIN"));
+	}
+
+	@Test
+	void cardSemPrecoAtualLogaAvisoPrefixadoColetaComAsin() {
+		when(driver.findElements(By.cssSelector(selectors.getCardContainer()))).thenReturn(List.of(card));
+		when(card.getAttribute(selectors.getAsinAttributo())).thenReturn("B0EXEMPLO");
+		when(card.findElement(By.cssSelector(selectors.getPrecoAtual())))
+				.thenThrow(new NoSuchElementException("nao encontrado"));
+
+		scraper.buscarPorKeyword("monitor gamer");
+
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.WARN
+				&& evento.getFormattedMessage().startsWith("COLETA:")
+				&& evento.getFormattedMessage().contains("asin=B0EXEMPLO"));
+	}
+
+	@Test
+	void cardComTituloAusenteEDescartadoELogaAvisoPrefixadoColeta() {
+		when(driver.findElements(By.cssSelector(selectors.getCardContainer()))).thenReturn(List.of(card));
+		when(card.getAttribute(selectors.getAsinAttributo())).thenReturn("B0EXEMPLO");
+		when(card.findElement(By.cssSelector(selectors.getPrecoAtual()))).thenReturn(precoAtualElemento);
+		when(precoAtualElemento.getText()).thenReturn("R$ 1.299,00");
+		when(card.findElement(By.cssSelector(selectors.getTitulo())))
+				.thenThrow(new NoSuchElementException("nao encontrado"));
+		when(card.findElement(By.cssSelector(selectors.getPrecoRiscado())))
+				.thenThrow(new NoSuchElementException("nao encontrado"));
+		when(card.findElement(By.cssSelector(selectors.getImagem())))
+				.thenThrow(new NoSuchElementException("nao encontrado"));
+		when(card.findElement(By.cssSelector(selectors.getLink())))
+				.thenThrow(new NoSuchElementException("nao encontrado"));
+
+		List<ScrapedProductDTO> produtos = scraper.buscarPorKeyword("monitor gamer");
+
+		assertThat(produtos).isEmpty();
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.WARN
+				&& evento.getFormattedMessage().startsWith("COLETA:")
+				&& evento.getFormattedMessage().contains("dados invalidos")
+				&& evento.getFormattedMessage().contains("asin=B0EXEMPLO"));
 	}
 
 }

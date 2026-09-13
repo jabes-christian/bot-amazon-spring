@@ -292,13 +292,15 @@ T9
 
 **Done when**:
 
-- [ ] `PromotionDetectionService` loga ao menos a decisão de elegibilidade de cada produto avaliado, prefixado `DETECCAO:`
-- [ ] `ColetaScheduler` loga início e fim de cada disparo agendado, prefixado `COLETA:`
-- [ ] `AmazonProductScraper` loga toda falha hoje silenciosa (timeout, elemento não encontrado), prefixada `COLETA:`, em vez de retornar lista vazia sem rastro
-- [ ] As 5 classes já prefixadas (`ColetaService`, `DisparoService`, `DisparoScheduler`, `BannerImageService`, `CopyGenerationService`) permanecem inalteradas — nenhuma mensagem existente reformatada
-- [ ] Os 5 test classes que já asserem conteúdo de log (`ColetaServiceTest`, `DisparoServiceTest`, `DisparoSchedulerTest`, `CopyGenerationServiceTest`, `BannerImageServiceIT`) continuam passando sem modificação
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: pelo menos 3 testes novos (1 por classe que ganhou log pela primeira vez: `PromotionDetectionServiceTest` cobrindo o novo log, `ColetaSchedulerTest` novo, extensão de `AmazonProductScraperTest` existente), 0 falhas
+- [x] `PromotionDetectionService` loga ao menos a decisão de elegibilidade de cada produto avaliado, prefixado `DETECCAO:`
+- [x] `ColetaScheduler` loga início e fim de cada disparo agendado, prefixado `COLETA:`
+- [x] `AmazonProductScraper` loga toda falha hoje silenciosa (timeout, elemento não encontrado), prefixada `COLETA:`, em vez de retornar lista vazia sem rastro
+- [x] As 5 classes já prefixadas (`ColetaService`, `DisparoService`, `DisparoScheduler`, `BannerImageService`, `CopyGenerationService`) permanecem inalteradas — nenhuma mensagem existente reformatada
+- [x] Os 5 test classes que já asserem conteúdo de log (`ColetaServiceTest`, `DisparoServiceTest`, `DisparoSchedulerTest`, `CopyGenerationServiceTest`, `BannerImageServiceIT`) continuam passando sem modificação
+- [x] Gate check passa: `mvn test` (e `mvn clean verify` completo — 106 testes, 0 falhas: 78 unit + 28 integration)
+- [x] Test count: 8 testes novos (3 em `PromotionDetectionServiceTest`, 1 `ColetaSchedulerTest` novo, 4 em `AmazonProductScraperTest`), 0 falhas
+
+**Nota de implementação**: em `AmazonProductScraper`, os catches de `NoSuchElementException` nos helpers genéricos `extrairTextoDoCard`/`extrairAtributoDoCard` **não** ganharam log individual — esses cobrem tanto campos obrigatórios quanto opcionais (ex.: `precoRiscado` ausente é o caso normal de um produto sem preço "de/por", não uma falha). Logar cada ocorrência geraria ruído para um cenário rotineiro. Em vez disso, os pontos de descarte de card em `extrairProduto` (ASIN ausente, preço atual ausente/inválido, `IllegalArgumentException` do DTO — que hoje cobre `titulo` ausente) ganharam log `WARN` prefixado `COLETA:`, cobrindo a perda real de dado (card inteiro descartado), que é o cenário que a Done-when de fato precisa rastrear.
 
 **Tests**: unit
 **Gate**: quick

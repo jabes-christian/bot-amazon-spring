@@ -3,6 +3,7 @@ package com.jchristian.bot_amazon_spring.scraper;
 import com.jchristian.bot_amazon_spring.config.AmazonSelectorsProperties;
 import com.jchristian.bot_amazon_spring.dto.ScrapedProductDTO;
 import com.jchristian.bot_amazon_spring.scraper.base.BaseScraper;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class AmazonProductScraper extends BaseScraper {
 
 	private static final String BASE_SEARCH_URL = "https://www.amazon.com.br/s?k=";
@@ -37,6 +39,7 @@ public class AmazonProductScraper extends BaseScraper {
 		try {
 			cards = aguardarElementos(By.cssSelector(selectors.getCardContainer()));
 		} catch (TimeoutException e) {
+			log.warn("COLETA: nenhum card encontrado para keyword apos timeout - keyword={}", keyword);
 			return List.of();
 		}
 
@@ -53,11 +56,13 @@ public class AmazonProductScraper extends BaseScraper {
 	private ScrapedProductDTO extrairProduto(WebElement card) {
 		String asin = card.getAttribute(selectors.getAsinAttributo());
 		if (asin == null || asin.isBlank()) {
+			log.warn("COLETA: card sem ASIN, descartado");
 			return null;
 		}
 
 		BigDecimal precoAtual = parsePreco(extrairTextoDoCard(card, selectors.getPrecoAtual()));
 		if (precoAtual == null) {
+			log.warn("COLETA: card sem preco atual valido, descartado - asin={}", asin);
 			return null;
 		}
 
@@ -69,6 +74,7 @@ public class AmazonProductScraper extends BaseScraper {
 		try {
 			return ScrapedProductDTO.of(asin, titulo, precoAtual, precoRiscado, urlImagem, urlProduto);
 		} catch (IllegalArgumentException e) {
+			log.warn("COLETA: card com dados invalidos, descartado - asin={}, motivo={}", asin, e.getMessage());
 			return null;
 		}
 	}

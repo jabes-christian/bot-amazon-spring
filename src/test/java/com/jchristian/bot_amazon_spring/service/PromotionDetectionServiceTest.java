@@ -1,13 +1,20 @@
 package com.jchristian.bot_amazon_spring.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.jchristian.bot_amazon_spring.dto.CandidatoPromocaoDTO;
 import com.jchristian.bot_amazon_spring.entity.Product;
 import com.jchristian.bot_amazon_spring.repository.PriceHistoryRepository;
 import com.jchristian.bot_amazon_spring.repository.ProductRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,6 +41,22 @@ class PromotionDetectionServiceTest {
 
 	@Mock
 	private ConfigService configService;
+
+	private ListAppender<ILoggingEvent> logAppender;
+
+	@BeforeEach
+	void setUpLogCapture() {
+		Logger logger = (Logger) LoggerFactory.getLogger(PromotionDetectionService.class);
+		logAppender = new ListAppender<>();
+		logAppender.start();
+		logger.addAppender(logAppender);
+	}
+
+	@AfterEach
+	void tearDownLogCapture() {
+		Logger logger = (Logger) LoggerFactory.getLogger(PromotionDetectionService.class);
+		logger.detachAppender(logAppender);
+	}
 
 	private PromotionDetectionService novoService() {
 		return new PromotionDetectionService(productRepository, priceHistoryRepository, configService);
@@ -137,6 +160,50 @@ class PromotionDetectionServiceTest {
 
 		assertThat(candidatos).isEmpty();
 		verify(productRepository, never()).save(any());
+	}
+
+	@Test
+	void produtoElegivelLogaDecisaoDeElegibilidadePrefixadaDeteccao() {
+		Product produto = produto(7L, new BigDecimal("70.00"), null, null);
+		when(productRepository.findAll()).thenReturn(List.of(produto));
+		when(priceHistoryRepository.countByProduct(produto)).thenReturn(2L);
+		when(priceHistoryRepository.findMenorPrecoByProduct(produto)).thenReturn(Optional.of(new BigDecimal("100.00")));
+		when(configService.getBigDecimal(eq(CHAVE_PERCENTUAL_MINIMO), any())).thenReturn(new BigDecimal("10"));
+		when(productRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+		novoService().buscarCandidatosElegiveis();
+
+		assertThat(logAppender.list).anyMatch(evento -> evento.getFormattedMessage().startsWith("DETECCAO:")
+				&& evento.getFormattedMessage().contains("asin=" + produto.getAsin())
+				&& evento.getFormattedMessage().contains("elegivel=true"));
+	}
+
+	@Test
+	void produtoNaoElegivelLogaDecisaoDeElegibilidadePrefixadaDeteccao() {
+		Product produto = produto(8L, new BigDecimal("95.00"), null, null);
+		when(productRepository.findAll()).thenReturn(List.of(produto));
+		when(priceHistoryRepository.countByProduct(produto)).thenReturn(2L);
+		when(priceHistoryRepository.findMenorPrecoByProduct(produto)).thenReturn(Optional.of(new BigDecimal("100.00")));
+		when(configService.getBigDecimal(eq(CHAVE_PERCENTUAL_MINIMO), any())).thenReturn(new BigDecimal("10"));
+
+		novoService().buscarCandidatosElegiveis();
+
+		assertThat(logAppender.list).anyMatch(evento -> evento.getFormattedMessage().startsWith("DETECCAO:")
+				&& evento.getFormattedMessage().contains("asin=" + produto.getAsin())
+				&& evento.getFormattedMessage().contains("elegivel=false"));
+	}
+
+	@Test
+	void produtoSemBaseDePrecoLogaAvaliacaoComPrefixoDeteccao() {
+		Product produto = produto(9L, new BigDecimal("80.00"), null, null);
+		when(productRepository.findAll()).thenReturn(List.of(produto));
+		when(priceHistoryRepository.countByProduct(produto)).thenReturn(0L);
+
+		novoService().buscarCandidatosElegiveis();
+
+		assertThat(logAppender.list).anyMatch(evento -> evento.getLevel() == Level.INFO
+				&& evento.getFormattedMessage().startsWith("DETECCAO:")
+				&& evento.getFormattedMessage().contains("asin=" + produto.getAsin()));
 	}
 
 }
