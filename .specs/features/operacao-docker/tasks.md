@@ -136,12 +136,16 @@ T9
 
 **Done when**:
 
-- [ ] Uma variável obrigatória ausente/vazia → boot falha citando exatamente essa variável por nome (OPS-11)
-- [ ] Múltiplas variáveis ausentes → a exceção cita **todas**, não só a primeira encontrada
-- [ ] Todas as variáveis presentes → boot segue normalmente, validator não interfere
-- [ ] `mvn test`/`mvn verify` continuam passando sem nenhuma env var real setada (validator desativado via propriedade de sistema do plugin de teste, não via arquivo de properties que sombrearia o principal)
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 3 testes novos passam (uma ausente, várias ausentes, nenhuma ausente), 0 falhas
+- [x] Uma variável obrigatória ausente/vazia → boot falha citando exatamente essa variável por nome (OPS-11)
+- [x] Múltiplas variáveis ausentes → a exceção cita **todas**, não só a primeira encontrada
+- [x] Todas as variáveis presentes → boot segue normalmente, validator não interfere
+- [x] `mvn test`/`mvn verify` continuam passando sem nenhuma env var real setada (validator desativado via propriedade de sistema do plugin de teste, não via arquivo de properties que sombrearia o principal)
+- [x] Gate check passa: `mvn test` (e `mvn clean verify` completo, a pedido do usuário — 97 testes, 0 falhas)
+- [x] Test count: 4 testes novos passam (uma ausente, várias ausentes, nenhuma ausente, validator desativado), 0 falhas
+
+**Correção de pesquisa (2026-09-12, durante Execute de T2)**: a interface a implementar é `org.springframework.boot.EnvironmentPostProcessor` (nova, desde 4.0.0) — **não** `org.springframework.boot.env.EnvironmentPostProcessor`, que existe com a mesma assinatura mas está `@Deprecated(since = "4.0.0", forRemoval = true)`. Confirmado via decompilação/leitura do source real de `spring-boot-4.1.1-sources.jar` (Context7 não distinguiu as duas variantes na primeira consulta). O registro em `META-INF/spring.factories` usa a chave nova (`org.springframework.boot.EnvironmentPostProcessor=...`). Ordenação confirmada via bytecode: `ConfigDataEnvironmentPostProcessor.ORDER = Ordered.HIGHEST_PRECEDENCE + 10`; o validator usa `ConfigDataEnvironmentPostProcessor.ORDER + 1`. Comportamento fim a fim confirmado com `mvn spring-boot:run` real sem nenhuma env var setada: falha citando as 10 propriedades, antes de qualquer tentativa de conexão com o banco.
+
+**Correção adicional (2026-09-12, durante Execute de T2)**: a tabela de Requirement Traceability do `spec.md` nunca foi atualizada para OPS-09/OPS-10 ao fechar T1 (lacuna do autor, não pega por nenhum gate automático). Corrigida agora junto com OPS-09 (completo)/OPS-11 desta task — ver `spec.md`.
 
 **Tests**: unit
 **Gate**: quick

@@ -135,9 +135,9 @@ O bot precisa rodar de forma reproduzível em desenvolvimento (IDE + hot-reload)
 | OPS-06 | P1: Ambiente de produção | Design | Pending |
 | OPS-07 | P1: Ambiente de produção | Design | Pending |
 | OPS-08 | P1: Ambiente de produção | Design | Pending |
-| OPS-09 | P1: Segredos via variáveis de ambiente | Design | Pending |
-| OPS-10 | P1: Segredos via variáveis de ambiente | Design | Pending |
-| OPS-11 | P1: Segredos via variáveis de ambiente | Design | Pending |
+| OPS-09 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
+| OPS-10 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
+| OPS-11 | P1: Segredos via variáveis de ambiente | Execute | Implementing |
 | OPS-12 | P1: Log estruturado por etapa | Design | Pending |
 | OPS-13 | P1: Log estruturado por etapa | Design | Pending |
 | OPS-14 | Edge case: healthcheck Postgres | Design | Pending |

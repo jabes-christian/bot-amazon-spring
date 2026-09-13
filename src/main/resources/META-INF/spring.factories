@@ -1,0 +1,2 @@
+org.springframework.boot.EnvironmentPostProcessor=\
+com.jchristian.bot_amazon_spring.config.RequiredEnvironmentValidator

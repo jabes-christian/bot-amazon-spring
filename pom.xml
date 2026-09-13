@@ -137,7 +137,23 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<!-- RequiredEnvironmentValidator (OPS-11): nenhum teste seta as 10 variaveis
+						     obrigatorias, entao o validator fica desativado ao rodar via Maven. -->
+						<bot-amazon.required-env-validator.disabled>true</bot-amazon.required-env-validator.disabled>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<bot-amazon.required-env-validator.disabled>true</bot-amazon.required-env-validator.disabled>
+					</systemPropertyVariables>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
