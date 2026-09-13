@@ -117,6 +117,8 @@ T9
 
 **Commit**: `feat(operacao-docker): adiciona spring.datasource via env vars, spring.config.import e .env.example`
 
+**Correção (2026-09-12, durante Execute de T2)**: os defaults de dev local (`jdbc:postgresql://localhost:5432/bot_amazon`/`postgres`/`postgres`) foram removidos de `spring.datasource.url/username/password` — `${DB_URL:}`/`${DB_USER:}`/`${DB_PASSWORD:}`, sem fallback, igual ao padrão já usado por `telegram.bot.token`/`evolution.api.*`/`openrouter.*`/`afiliado.tag`. Motivo: um default não-vazio faz `PropertySourcesPropertyResolver` sempre resolver um valor, tornando o fail-fast do `RequiredEnvironmentValidator` (T2, OPS-11) um no-op permanente para estas 3 chaves — a app "acharia" um valor e só falharia depois, com um erro JDBC de conexão recusada em produção em vez da mensagem clara e imediata do validator. Descoberto ao desenhar T2; corrigido antes de implementar o validator. `DB_URL`/`DB_USER`/`DB_PASSWORD` passam a ser obrigatórias sem fallback, validadas por T2 pela property (`spring.datasource.*`), igual às outras 7 chaves.
+
 ---
 
 ### T2: `RequiredEnvironmentValidator` (fail-fast no boot)
