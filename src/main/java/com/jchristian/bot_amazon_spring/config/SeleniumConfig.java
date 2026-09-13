@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -27,6 +28,7 @@ public class SeleniumConfig {
 	}
 
 	@Bean
+	@Lazy
 	public WebDriver webDriver(ChromeOptions chromeOptions, @Value("${selenium.remote.url:}") String remoteUrl)
 			throws URISyntaxException, MalformedURLException {
 		if (!remoteUrl.isBlank()) {
@@ -37,7 +39,7 @@ public class SeleniumConfig {
 	}
 
 	@Bean
-	public WebDriverWait webDriverWait(WebDriver webDriver,
+	public WebDriverWait webDriverWait(@Lazy WebDriver webDriver,
 			@Value("${selenium.wait-timeout-segundos:10}") long timeoutSegundos) {
 		return new WebDriverWait(webDriver, Duration.ofSeconds(timeoutSegundos));
 	}

@@ -9,6 +9,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -24,7 +25,7 @@ public class AmazonProductScraper extends BaseScraper {
 
 	private final AmazonSelectorsProperties selectors;
 
-	public AmazonProductScraper(WebDriver driver, WebDriverWait wait, AmazonSelectorsProperties selectors) {
+	public AmazonProductScraper(@Lazy WebDriver driver, WebDriverWait wait, AmazonSelectorsProperties selectors) {
 		super(driver, wait);
 		this.selectors = selectors;
 	}

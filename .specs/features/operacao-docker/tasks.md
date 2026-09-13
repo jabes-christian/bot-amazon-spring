@@ -169,11 +169,13 @@ T9
 
 **Done when**:
 
-- [ ] `mvn verify` deixa de exigir Chrome instalado na máquina — nenhum `WebDriver` real é instanciado a menos que um método do scraper seja de fato chamado
-- [ ] Teste via `ApplicationContextRunner` sobre `SeleniumConfig` isolada confirma que o bean `webDriver` não é um singleton materializado após o refresh do contexto sem uso
-- [ ] Remover qualquer um dos 3 `@Lazy` faz o teste falhar (alvo de mutação limpo — confirmar manualmente durante a implementação, sensor formal fica a cargo do Verifier)
-- [ ] Gate check passa: `mvn test`
-- [ ] Test count: 1 teste novo passa, 0 falhas
+- [x] `mvn verify` deixa de exigir Chrome instalado na máquina — nenhum `WebDriver` real é instanciado a menos que um método do scraper seja de fato chamado
+- [x] Teste via `ApplicationContextRunner` sobre `SeleniumConfig` isolada confirma que o bean `webDriver` não é um singleton materializado após o refresh do contexto sem uso
+- [x] Remover qualquer um dos 3 `@Lazy` faz o teste falhar (alvo de mutação limpo — confirmado manualmente nesta sessão, os 3 pontos testados um de cada vez e restaurados)
+- [x] Gate check passa: `mvn test` (e `mvn clean verify` completo — 98 testes, 0 falhas)
+- [x] Test count: 1 teste novo passa, 0 falhas
+
+**Nota de implementação**: o teste registra `SeleniumConfig` + `AmazonSelectorsProperties` + `AmazonProductScraper` juntos no `ApplicationContextRunner` (não só `SeleniumConfig` isolada) — necessário para que a mutação do 3º ponto (`@Lazy` no construtor de `AmazonProductScraper`) seja de fato observável pelo teste; um contexto com só `SeleniumConfig` não inclui o consumidor que expõe esse ponto.
 
 **Tests**: unit
 **Gate**: quick
