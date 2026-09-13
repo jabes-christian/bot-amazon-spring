@@ -228,10 +228,12 @@ T9
 
 **Done when**:
 
-- [ ] `docker compose up` sobe apenas o serviço `postgres` (OPS-01)
-- [ ] Serviço `postgres` fica `healthy` via healthcheck antes de qualquer conexão da aplicação (OPS-02)
-- [ ] Com `SELENIUM_REMOTE_URL` vazia/ausente, a aplicação rodada pela IDE usa ChromeDriver local (OPS-03 — comportamento herdado, não implementado aqui)
-- [ ] Gate check passa: `mvn clean verify`
+- [x] `docker compose up` sobe apenas o serviço `postgres` (OPS-01) — confirmado com `docker compose up -d` real nesta sessão
+- [x] Serviço `postgres` fica `healthy` via healthcheck antes de qualquer conexão da aplicação (OPS-02) — `docker compose ps`: `Up 15 seconds (healthy)`; `docker inspect .State.Health`: `pg_isready` retornando "accepting connections"
+- [x] Com `SELENIUM_REMOTE_URL` vazia/ausente, a aplicação rodada pela IDE usa ChromeDriver local (OPS-03 — comportamento herdado, não implementado aqui; este compose nem define a variável, então o ramo já existente em `SeleniumConfig` se aplica sem alteração)
+- [x] Gate check passa: `mvn clean verify` (98 testes, 0 falhas)
+
+**Verificação adicional**: porta `5432` publicada testada de fato — conexão TCP de `127.0.0.1:5432` do host bem-sucedida (`pg_isready` via container cliente e teste de socket direto), confirmando acesso da IDE.
 
 **Tests**: none
 **Gate**: build
