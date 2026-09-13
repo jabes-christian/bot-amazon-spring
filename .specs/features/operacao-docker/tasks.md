@@ -106,11 +106,11 @@ T9
 
 **Done when**:
 
-- [ ] `application.properties` lê `spring.datasource.url/username/password` de `${DB_URL}`/`${DB_USER}`/`${DB_PASSWORD}` com defaults de dev local (OPS-09 parcial)
-- [ ] `spring.config.import=optional:file:.env[.properties]` presente, prefixo `optional:` confirmado (não quebra o boot quando `.env` não existe)
-- [ ] `.env.example` versionado com as 11 chaves acima, cada uma com um placeholder claro (nunca um valor real) (OPS-10)
-- [ ] `.gitignore:36-38` já ignora `.env`/`.env.local`/`.env.*.local` e **não** ignora `.env.example` — confirmado, não alterado
-- [ ] Gate check passa: `mvn clean verify` (as ITs continuam usando o datasource do Testcontainers via `@ServiceConnection`, que sobrepõe `spring.datasource.*`)
+- [x] `application.properties` lê `spring.datasource.url/username/password` de `${DB_URL}`/`${DB_USER}`/`${DB_PASSWORD}` com defaults de dev local (OPS-09 parcial)
+- [x] `spring.config.import=optional:file:.env[.properties]` presente, prefixo `optional:` confirmado (não quebra o boot quando `.env` não existe)
+- [x] `.env.example` versionado com as 11 chaves acima, cada uma com um placeholder claro (nunca um valor real) (OPS-10)
+- [x] `.gitignore:36-38` já ignora `.env`/`.env.local`/`.env.*.local` e **não** ignora `.env.example` — confirmado, não alterado
+- [x] Gate check passa: `mvn clean verify` (as ITs continuam usando o datasource do Testcontainers via `@ServiceConnection`, que sobrepõe `spring.datasource.*`)
 
 **Tests**: none
 **Gate**: build
