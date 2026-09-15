@@ -60,6 +60,20 @@ class CopyGenerationServiceTest {
 		return new CandidatoPromocaoDTO(produto(), new BigDecimal("25.00"), new BigDecimal("1199.00"));
 	}
 
+	private static Product produtoComQuerystring() {
+		return Product.builder()
+				.id(2L)
+				.asin("B0COPY2")
+				.titulo("Fone Bluetooth Premium")
+				.precoAtual(new BigDecimal("199.00"))
+				.urlProduto("https://www.amazon.com.br/dp/B0COPY2?_encoding=UTF8&pd_rd_w=abc123&ref_=pd_hp_d_r_btf_qpp")
+				.build();
+	}
+
+	private static CandidatoPromocaoDTO candidatoComQuerystring() {
+		return new CandidatoPromocaoDTO(produtoComQuerystring(), new BigDecimal("30.00"), new BigDecimal("279.00"));
+	}
+
 	@BeforeEach
 	void setUpLogCapture() {
 		Logger logger = (Logger) LoggerFactory.getLogger(CopyGenerationService.class);
@@ -196,6 +210,20 @@ class CopyGenerationServiceTest {
 
 		assertThat(resultado.texto().length()).isLessThanOrEqualTo(80);
 		assertThat(resultado.texto()).endsWith(linkEsperado);
+	}
+
+	@Test
+	void urlProdutoComQuerystringExistenteUsaEComercialAntesDaTagEContinuaValida() {
+		when(configService.getLong(eq(CHAVE_TIMEOUT), anyLong())).thenReturn(5L);
+		when(configService.getInt(eq(CHAVE_LIMITE), anyInt())).thenReturn(1024);
+		when(chatModel.chat(anyString())).thenThrow(new RuntimeException("falha simulada"));
+
+		CopyResultadoDTO resultado = novoService().gerarCopy(candidatoComQuerystring());
+
+		String linkEsperado = "https://www.amazon.com.br/dp/B0COPY2?_encoding=UTF8&pd_rd_w=abc123&ref_=pd_hp_d_r_btf_qpp&tag="
+				+ TAG_AFILIADO;
+		assertThat(resultado.texto()).contains(linkEsperado);
+		assertThat(resultado.texto().chars().filter(c -> c == '?').count()).isEqualTo(1);
 	}
 
 }

@@ -93,7 +93,9 @@ public class CopyGenerationService {
 	}
 
 	private String montarLinkAfiliado(Product produto) {
-		return produto.getUrlProduto() + "?tag=" + tagAfiliado;
+		String urlProduto = produto.getUrlProduto();
+		String separador = urlProduto.contains("?") ? "&tag=" : "?tag=";
+		return urlProduto + separador + tagAfiliado;
 	}
 
 	private String truncarCorpo(String corpo, String link, int limite) {
