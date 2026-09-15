@@ -73,6 +73,8 @@ public class CopyGenerationService {
 				Desconto: %s%%
 				Inclua o nome do produto, os dois preços, o percentual de desconto e uma chamada para ação.
 				Não inclua nenhum link ou URL no texto.
+				Apresente o preço anterior em tachado usando Markdown padrão (~~preço anterior~~) e o preço atual em destaque usando negrito Markdown padrão (**preço atual**).
+				Não inclua nenhuma tag, marcador ou texto de controle (como <CPA_DONE> ou similares) - a resposta deve conter apenas a copy em texto puro.
 				""".formatted(produto.getTitulo(), candidato.precoBase(), produto.getPrecoAtual(),
 				candidato.percentualDesconto());
 	}

@@ -12,6 +12,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,9 @@ class CopyGenerationServiceTest {
 
 	@Mock
 	private ConfigService configService;
+
+	@Captor
+	private ArgumentCaptor<String> promptCaptor;
 
 	private ListAppender<ILoggingEvent> logAppender;
 
@@ -210,6 +215,21 @@ class CopyGenerationServiceTest {
 
 		assertThat(resultado.texto().length()).isLessThanOrEqualTo(80);
 		assertThat(resultado.texto()).endsWith(linkEsperado);
+	}
+
+	@Test
+	void promptEnviadoAoLlmReforcaFormatacaoDePrecosEProibeTagsDeControle() {
+		when(configService.getLong(eq(CHAVE_TIMEOUT), anyLong())).thenReturn(5L);
+		when(configService.getInt(eq(CHAVE_LIMITE), anyInt())).thenReturn(1024);
+		when(chatModel.chat(promptCaptor.capture())).thenReturn("copy gerada");
+
+		novoService().gerarCopy(candidato());
+
+		String prompt = promptCaptor.getValue();
+		assertThat(prompt).contains(
+				"Apresente o preço anterior em tachado usando Markdown padrão (~~preço anterior~~) e o preço atual em destaque usando negrito Markdown padrão (**preço atual**).");
+		assertThat(prompt).contains(
+				"Não inclua nenhuma tag, marcador ou texto de controle (como <CPA_DONE> ou similares)");
 	}
 
 	@Test

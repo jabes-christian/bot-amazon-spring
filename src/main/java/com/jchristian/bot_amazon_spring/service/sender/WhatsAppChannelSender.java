@@ -12,10 +12,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Base64;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 public class WhatsAppChannelSender implements ChannelSender {
+
+	// O LLM produz Markdown padrao (CommonMark): **negrito** e ~~tachado~~. O WhatsApp usa um
+	// unico caractere para cada enfase: *negrito* e ~tachado~ (ver Formatting messages na doc da
+	// Evolution/WhatsApp Business API). Sem essa conversao o usuario final veria os marcadores
+	// duplicados de forma literal.
+	private static final Pattern NEGRITO_MARKDOWN_PADRAO = Pattern.compile("\\*\\*(.+?)\\*\\*");
+	private static final Pattern TACHADO_MARKDOWN_PADRAO = Pattern.compile("~~(.+?)~~");
 
 	private final RestClient restClient;
 	private final String apiUrl;
@@ -53,7 +61,7 @@ public class WhatsAppChannelSender implements ChannelSender {
 				"mimetype", "image/jpeg",
 				"fileName", "banner.jpg",
 				"media", mediaBase64,
-				"caption", conteudo.copy());
+				"caption", converterParaSintaxeWhatsApp(conteudo.copy()));
 
 		restClient.post()
 				.uri(apiUrl + "/message/sendMedia/" + instance)
@@ -64,7 +72,8 @@ public class WhatsAppChannelSender implements ChannelSender {
 	}
 
 	private void enviarTextoPuro(Channel canal, ConteudoEnriquecidoDTO conteudo) {
-		Map<String, String> corpo = Map.of("number", canal.getIdentificador(), "text", conteudo.copy());
+		Map<String, String> corpo = Map.of("number", canal.getIdentificador(), "text",
+				converterParaSintaxeWhatsApp(conteudo.copy()));
 
 		restClient.post()
 				.uri(apiUrl + "/message/sendText/" + instance)
@@ -72,6 +81,11 @@ public class WhatsAppChannelSender implements ChannelSender {
 				.body(corpo)
 				.retrieve()
 				.toBodilessEntity();
+	}
+
+	private String converterParaSintaxeWhatsApp(String texto) {
+		String comNegritoConvertido = NEGRITO_MARKDOWN_PADRAO.matcher(texto).replaceAll("*$1*");
+		return TACHADO_MARKDOWN_PADRAO.matcher(comNegritoConvertido).replaceAll("~$1~");
 	}
 
 	private String lerBannerComoBase64(ConteudoEnriquecidoDTO conteudo) {

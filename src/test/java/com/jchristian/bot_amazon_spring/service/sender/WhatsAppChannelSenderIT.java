@@ -82,6 +82,41 @@ class WhatsAppChannelSenderIT {
 	}
 
 	@Test
+	void negritoETachadoMarkdownPadraoSaoConvertidosParaSintaxeWhatsAppNoTextoPuro() {
+		ConteudoEnriquecidoDTO conteudo = new ConteudoEnriquecidoDTO("De: ~~R$ 199,00~~ Por: **R$ 149,00**", null, true);
+
+		server.expect(requestTo("https://evolution.teste.com/message/sendText/bot-amazon"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(
+						content().json("{\"number\":\"5511999999999\",\"text\":\"De: ~R$ 199,00~ Por: *R$ 149,00*\"}"))
+				.andRespond(withSuccess("{\"status\":\"PENDING\"}", MediaType.APPLICATION_JSON));
+
+		whatsAppChannelSender.enviar(canal(), conteudo);
+
+		server.verify();
+	}
+
+	@Test
+	void negritoETachadoMarkdownPadraoSaoConvertidosParaSintaxeWhatsAppNaCaptionComBanner() throws IOException {
+		Path banner = Files.createTempFile("banner-teste-", ".jpg");
+		Files.write(banner, "conteudo-fake-da-imagem".getBytes());
+		try {
+			ConteudoEnriquecidoDTO conteudo = new ConteudoEnriquecidoDTO("~~De~~ **Por**", banner, true);
+
+			server.expect(requestTo("https://evolution.teste.com/message/sendMedia/bot-amazon"))
+					.andExpect(method(HttpMethod.POST))
+					.andExpect(content().string(containsString("\"caption\":\"~De~ *Por*\"")))
+					.andRespond(withSuccess("{\"status\":\"PENDING\"}", MediaType.APPLICATION_JSON));
+
+			whatsAppChannelSender.enviar(canal(), conteudo);
+
+			server.verify();
+		} finally {
+			Files.deleteIfExists(banner);
+		}
+	}
+
+	@Test
 	void respostaHttp201ComStatusPendingNoCorpoETratadaComoSucesso() {
 		ConteudoEnriquecidoDTO conteudo = new ConteudoEnriquecidoDTO("copy sem banner", null, false);
 
